@@ -2,14 +2,14 @@
 
 const createKnex = require('knex');
 
-const {DATABASE_URL} = require('./config');
+const { DATABASE_URL } = require('../config');
 
 let knex = null;
 
 function dbConnect(url = DATABASE_URL) {
   knex = createKnex({
     client: 'pg',
-    connection: url
+    connection: url,
   });
 }
 
@@ -24,5 +24,5 @@ function dbGet() {
 module.exports = {
   dbConnect,
   dbDisconnect,
-  dbGet
+  dbGet,
 };
