@@ -1,5 +1,6 @@
 'use strict';
 
+
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 
@@ -8,6 +9,11 @@ const schema = new mongoose.Schema({
   lastName: { type: String, default: '' },
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  list: [{
+    item: { type: String },
+    aisle: { type: String },
+    picked: { type: Boolean}
+  }]
 });
 
 schema.set('toJSON', {
@@ -19,12 +25,12 @@ schema.set('toJSON', {
   },
 });
 
-schema.methods.validatePassword = function(pwd) {
+schema.methods.validatePassword = function (pwd) {
   const currentUser = this;
   return bcrypt.compare(pwd, currentUser.password);
 };
 
-schema.statics.hashPassword = function(pwd) {
+schema.statics.hashPassword = function (pwd) {
   return bcrypt.hash(pwd, 10);
 };
 
