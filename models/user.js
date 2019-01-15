@@ -8,6 +8,13 @@ const schema = new mongoose.Schema({
   lastName: { type: String, default: '' },
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  list: [
+    {
+      item: { type: String },
+      aisle: { type: String },
+      checked: { type: Boolean },
+    },
+  ],
 });
 
 schema.set('toJSON', {
