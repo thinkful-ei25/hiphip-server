@@ -10,9 +10,9 @@ const schema = new mongoose.Schema({
   password: { type: String, required: true },
   list: [
     {
-      item: { type: String },
-      aisle: { type: String },
-      checked: { type: Boolean },
+      name,
+      store,
+      items: [{ name: String, checked: Boolean, aisle: String }],
     },
   ],
 });
