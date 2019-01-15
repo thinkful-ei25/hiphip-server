@@ -5,7 +5,12 @@ const mongoose = require('mongoose');
 const schema = new mongoose.Schema({
   name: { type: String, required: true },
   address: { type: String, required: true, unique: true },
-  aisles: { type: Array },
+  aisles: [
+    {
+      aisleNo: { type: String },
+      categories: { type: Array },
+    },
+  ],
 });
 
 schema.set('toJSON', {
