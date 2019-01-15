@@ -74,17 +74,40 @@ router.put('/:id', (req, res, next) => {
 //add new item
 
 router.post('/', (req, res, next) => {
-  const {item, aisle} = req.body;
-  const newItem = {item, aisle};
+  const { item, aisle } = req.body;
+  const newItem = { item, aisle };
 
-  if(!newItem.item){
+  if (!newItem.item) {
     const err = new Error('Missing item name');
     err.status = 400;
     return next(err);
   }
 
-  items.create(newItem)
-  .then(item => {
-    if(item)
-  })
+  items
+    .create(newItem)
+    .then(item => {
+      if (item) {
+        res
+          .location(`http://${req.headers.host}/items/${item.id}`)
+          .status(201)
+          .json(item);
+      }
+    })
+    .catch(err => {
+      next(err);
+    });
+});
+
+//Delete an item
+router.delete('/:id', (req, res, next) => {
+  const id = req.params.id;
+
+  notes
+    .delete(id)
+    .then(() => {
+      res.sendStatus(204);
+    })
+    .catch(err => {
+      next(err);
+    });
 });
