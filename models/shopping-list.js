@@ -6,7 +6,7 @@ const ShoppingListItem = require('./shopping-list-item');
 
 const shoppingListSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
+    name: { type: String, required: true, unique: true },
     store: { type: mongoose.Schema.Types.ObjectId, ref: 'Store' },
     items: { type: [ShoppingListItem], default: [] },
   },
