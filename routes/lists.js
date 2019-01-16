@@ -99,6 +99,7 @@ router
       .catch(next);
   })
 
+  //
   .post((req, res, next) => {
     const { id: userId } = req.user;
     const { name, store } = req.body;
@@ -107,7 +108,6 @@ router
     if (missingField) {
       throw new ValidationError(missingField, 'Missing field', 422);
     }
-    let newList;
 
     let storePromise = Promise.resolve(null);
 
@@ -127,19 +127,19 @@ router
         }
       );
     }
-
+    let newShoppingList;
     storePromise.then(storeObject => {
-      User.findById(userId)
+      ShoppingList.create({ name, store: storeObject, user: userId })
+        .then(shoppingList => {
+          newShoppingList = shoppingList;
+          return User.findById(userId);
+        })
         .then(user => {
-          newList = user.shoppingLists.create({
-            name,
-            store: storeObject ? storeObject.id : null,
-          });
-          user.shoppingLists.push(newList);
+          user.shoppingLists.push(newShoppingList);
           return user.save();
         })
         .then(() => {
-          res.json({ shoppingList: newList });
+          res.status(201).json({ list: newShoppingList });
         })
         .catch(next);
     });
