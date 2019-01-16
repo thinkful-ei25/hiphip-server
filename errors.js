@@ -15,28 +15,23 @@ class HttpError extends Error {
 
 class NotFoundError extends HttpError {
   constructor(...params) {
-    super(...params);
+    super(404, 'Not found', ...params);
 
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, NotFoundError);
     }
-
-    this.message = 'Not found';
-    this.code = 404;
   }
 }
 
 class ValidationError extends HttpError {
   constructor(location, message, code = 400, ...params) {
-    super(...params);
+    super(code, message, ...params);
 
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, ValidationError);
     }
 
-    this.message = message;
     this.location = location;
-    this.code = code;
     this.reason = 'ValidationError';
   }
 }
