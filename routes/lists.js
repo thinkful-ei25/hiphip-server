@@ -20,7 +20,6 @@ router
     User.findById(userId)
       .then(user => {
         const list = user.shoppingLists.id(id);
-        console.log(list);
         if (list) {
           res.json(list);
         } else {
@@ -151,5 +150,3 @@ router
   });
 
 module.exports = router;
-
-//5c3e601d4c6d717f58dd1d83
