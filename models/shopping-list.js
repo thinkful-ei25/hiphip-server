@@ -9,6 +9,11 @@ const shoppingListSchema = new mongoose.Schema(
     name: { type: String, required: true },
     store: { type: mongoose.Schema.Types.ObjectId, ref: 'Store' },
     items: { type: [ShoppingListItem], default: [] },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
   },
   {
     toJSON: {
@@ -21,4 +26,4 @@ const shoppingListSchema = new mongoose.Schema(
   }
 );
 
-module.exports = shoppingListSchema;
+module.exports = mongoose.model('ShoppingList', shoppingListSchema);

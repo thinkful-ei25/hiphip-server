@@ -12,6 +12,7 @@ const usersRouter = require('./routes/users');
 const authRouter = require('./routes/auth');
 const storeRouter = require('./routes/store');
 const listRouter = require('./routes/lists');
+const itemRouter = require('./routes/items');
 const errorHandler = require('./middleware/errorHandler');
 
 const localStrategy = require('./passport/local');
@@ -38,7 +39,7 @@ app.use('/api/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/api/stores', storeRouter);
 app.use('/api/lists', listRouter);
-
+app.use('/api/items', itemRouter);
 app.use(errorHandler);
 
 /* eslint-disable no-console */
