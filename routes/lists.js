@@ -1,9 +1,11 @@
 'use strict';
 const express = require('express');
+const mongoose = require('mongoose');
 const passport = require('passport');
 
 const User = require('../models/user');
 const Store = require('../models/store');
+const { HttpError, NotFoundError, ValidationError } = require('../errors');
 
 const router = express.Router();
 const jwtAuth = passport.authenticate('jwt', { session: false });
@@ -16,17 +18,19 @@ router
   .get((req, res, next) => {
     const { id: userId } = req.user;
     const { id } = req.params;
-    //TODO: check that id is an ObjectId
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new HttpError(422, `${id} is not a valid ObjectId`);
+    }
+
     User.findById(userId)
       .then(user => {
         const list = user.shoppingLists.id(id);
-        console.log(list);
-        if (list) {
-          res.json(list);
-        } else {
-          //TODO: add an actual error here pls
-          throw new Error();
+        if (!list) {
+          throw new NotFoundError();
         }
+
+        res.json(list);
       })
       .catch(next);
   })
@@ -36,8 +40,7 @@ router
     User.findById(userId).then(user => {
       const list = user.shoppingLists.id(id);
       if (!list) {
-        throw new Error();
-        //TODO: add an actual error here pls
+        throw new NotFoundError();
       }
       const { name, store: newStore } = req.body;
       if (name) {
@@ -100,12 +103,7 @@ router
     const requiredFields = ['name'];
     const missingField = requiredFields.find(field => !(field in req.body));
     if (missingField) {
-      return res.status(422).json({
-        code: 422,
-        reason: 'ValidationError',
-        message: 'Missing field',
-        location: missingField,
-      });
+      throw new ValidationError(missingField, 'Missing field', 422);
     }
     let newList;
 
@@ -115,12 +113,7 @@ router
       const requiredFields = ['name', 'address', 'googleId'];
       const missingField = requiredFields.find(field => !(field in store));
       if (missingField) {
-        return res.status(422).json({
-          code: 422,
-          reason: 'ValidationError',
-          message: 'Missing field',
-          location: missingField,
-        });
+        throw new ValidationError(missingField, 'Missing field', 422);
       }
 
       storePromise = Store.findOneAndUpdate(
@@ -151,5 +144,3 @@ router
   });
 
 module.exports = router;
-
-//5c3e601d4c6d717f58dd1d83

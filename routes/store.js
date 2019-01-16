@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const Store = require('../models/store');
+const { ValidationError } = require('../errors');
 
 const router = express.Router();
 
@@ -13,12 +14,7 @@ router.post('/', jsonParser, (req, res, next) => {
   const missingField = requiredFields.find(field => !(field in req.body));
 
   if (missingField) {
-    return res.status(422).json({
-      code: 422,
-      reason: 'ValidationError',
-      message: 'Missing field',
-      location: missingField,
-    });
+    throw new ValidationError(missingField, 'Missing field', 422);
   }
 
   const { name, address } = req.body;
