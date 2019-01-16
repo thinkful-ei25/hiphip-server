@@ -26,9 +26,13 @@ router
 
     ShoppingList.findById(id)
       .then(shoppingList => {
+        if (!shoppingList) {
+          throw new NotFoundError();
+        }
+
         // TODO: see if there is a better way of comparing ObjectIds
         if (shoppingList.user.toString() !== userId) {
-          throw new HttpError(404, `${id} is not valid list id`);
+          throw new NotFoundError();
         }
 
         res.json({ list: shoppingList });
