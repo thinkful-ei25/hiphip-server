@@ -24,14 +24,14 @@ router
       throw new HttpError(422, `${id} is not a valid ObjectId`);
     }
 
-    User.findById(userId)
-      .then(user => {
-        const list = user.shoppingLists.id(id);
-        if (!list) {
-          throw new NotFoundError();
+    ShoppingList.findById(id)
+      .then(shoppingList => {
+        // TODO: see if there is a better way of comparing ObjectIds
+        if (shoppingList.user.toString() !== userId) {
+          throw new HttpError(404, `${id} is not valid list id`);
         }
 
-        res.json(list);
+        res.json({ list: shoppingList });
       })
       .catch(next);
   })
