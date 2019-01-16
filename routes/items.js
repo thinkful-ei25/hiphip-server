@@ -69,37 +69,51 @@ router
       })
       .catch(next);
   });
-router.route('/:listId/:id').patch((req, res, next) => {
-  const { listId, id } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(listId)) {
-    throw new HttpError(422, `${listId} is not a valid ObjectId`);
-  }
-  ShoppingList.findById(listId)
-    .then(list => {
-      if (!list) {
-        throw new NotFoundError();
-      }
-      const { name, isChecked, aisle } = req.body;
-      const item = list.items.id(id);
-      if (!item) {
-        throw new NotFoundError();
-      }
-      if (name) {
-        item.name = name;
-      }
-      if (isChecked !== item.isChecked) {
-        item.isChecked = isChecked;
-      }
-      if (aisle) {
-        item.aisle = aisle;
-      }
-      return list.save();
-    })
-    .then(list => {
-      const item = list.items.id(id);
-      res.json({ item });
-    })
-    .catch(next);
-});
+router
+  .route('/:listId/:id')
+  .patch((req, res, next) => {
+    const { listId, id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(listId)) {
+      throw new HttpError(422, `${listId} is not a valid ObjectId`);
+    }
+    ShoppingList.findById(listId)
+      .then(list => {
+        if (!list) {
+          throw new NotFoundError();
+        }
+        const { name, isChecked, aisle } = req.body;
+        const item = list.items.id(id);
+        if (!item) {
+          throw new NotFoundError();
+        }
+        if (name) {
+          item.name = name;
+        }
+        if (isChecked !== item.isChecked) {
+          item.isChecked = isChecked;
+        }
+        if (aisle) {
+          item.aisle = aisle;
+        }
+        return list.save();
+      })
+      .then(list => {
+        const item = list.items.id(id);
+        res.json({ item });
+      })
+      .catch(next);
+  })
+  .delete((req, res, next) => {
+    const { listId, id } = req.params;
+    ShoppingList.findById(listId)
+      .then(list => {
+        list.items.pull(id);
+        return list.save();
+      })
+      .then(() => {
+        res.sendStatus(204);
+      })
+      .catch(next);
+  });
 
 module.exports = router;
