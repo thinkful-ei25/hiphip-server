@@ -68,13 +68,37 @@ router
         res.json({ item: newItem });
       })
       .catch(next);
-  })
-  .patch((req, res, next) => {
-    const { listId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(listId)) {
-      throw new HttpError(422, `${listId} is not a valid ObjectId`);
-    }
-    const { name, isChecked, aisle } = req.body;
   });
+router.route('/:listId/:id').patch((req, res, next) => {
+  const { listId, id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(listId)) {
+    throw new HttpError(422, `${listId} is not a valid ObjectId`);
+  }
+  ShoppingList.findById(listId)
+    .then(list => {
+      if (!list) {
+        throw new NotFoundError();
+      }
+      const { name, isChecked, aisle } = req.body;
+      const item = list.items.id(id);
+      if (!item) {
+        throw new NotFoundError();
+      }
+      if (name) {
+        item.name = name;
+      }
+      if (isChecked !== item.isChecked) {
+        item.isChecked = isChecked;
+      }
+      if (aisle) {
+        item.aisle = aisle;
+      }
+      return item.save();
+    })
+    .then(item => {
+      res.json({ item });
+    })
+    .catch(next);
+});
 
 module.exports = router;
