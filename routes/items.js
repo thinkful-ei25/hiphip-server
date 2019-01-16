@@ -93,9 +93,10 @@ router.route('/:listId/:id').patch((req, res, next) => {
       if (aisle) {
         item.aisle = aisle;
       }
-      return item.save();
+      return list.save();
     })
-    .then(item => {
+    .then(list => {
+      const item = list.items.id(id);
       res.json({ item });
     })
     .catch(next);
