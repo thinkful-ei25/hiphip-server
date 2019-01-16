@@ -6,6 +6,7 @@ const passport = require('passport');
 const User = require('../models/user');
 const Store = require('../models/store');
 const { HttpError, NotFoundError, ValidationError } = require('../errors');
+const ShoppingList = require('../models/shopping-list');
 
 const router = express.Router();
 const jwtAuth = passport.authenticate('jwt', { session: false });
@@ -90,9 +91,10 @@ router
   .get((req, res, next) => {
     const { id: userId } = req.user;
     User.findById(userId)
+      .populate('shoppingLists')
       .then(user => {
         const { shoppingLists } = user;
-        res.json({ shoppingLists });
+        res.json({ lists: shoppingLists });
       })
       .catch(next);
   })
