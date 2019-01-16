@@ -95,7 +95,7 @@ router.post('/', jsonParser, (req, res, next) => {
       });
     })
     .then(user => {
-      return res.status(201).json(user);
+      return res.status(201).json({ user });
     })
     .catch(next);
 });
