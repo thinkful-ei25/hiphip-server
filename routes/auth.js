@@ -32,3 +32,5 @@ router.post('/refresh', jwtAuth, (req, res) => {
 });
 
 module.exports = router;
+
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImZpcnN0TmFtZSI6IiIsImxhc3ROYW1lIjoiIiwidXNlcm5hbWUiOiJ1c2VyTmFtZSIsInNob3BwaW5nTGlzdHMiOltdLCJpZCI6IjVjM2Y1NmRlOWI2MzYwM2ZmZTczMmU3MCJ9LCJpYXQiOjE1NDc2NTQ5OTQsImV4cCI6MTU0ODI1OTc5NCwic3ViIjoidXNlck5hbWUifQ.tieYVDVKiBvnaE82EJGOF-Q1l2yHag-dgRWKy0FJdu8
