@@ -7,8 +7,10 @@ const { DATABASE_URL } = require('../config');
 
 function dbConnect(url = DATABASE_URL) {
   return mongoose.connect(url).catch(err => {
+    /* eslint-disable no-console */
     console.error('Mongoose failed to connect');
     console.error(err);
+    /* eslint-enable no-console */
   });
 }
 

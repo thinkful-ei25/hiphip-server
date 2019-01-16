@@ -24,7 +24,7 @@ passport.use(jwtStrategy);
 
 app.use(
   morgan(process.env.NODE_ENV === 'production' ? 'common' : 'dev', {
-    skip: (req, res) => process.env.NODE_ENV === 'test',
+    skip: () => process.env.NODE_ENV === 'test',
   })
 );
 
@@ -41,6 +41,7 @@ app.use('/api/lists', listRouter);
 
 app.use(errorHandler);
 
+/* eslint-disable no-console */
 function runServer(port = PORT) {
   const server = app
     .listen(port, () => {
@@ -51,6 +52,7 @@ function runServer(port = PORT) {
       console.error(err);
     });
 }
+/* eslint-enable no-console */
 
 if (require.main === module) {
   dbConnect();
