@@ -79,14 +79,9 @@ router
   .delete((req, res, next) => {
     const { id: userId } = req.user;
     const { id } = req.params;
-    User.findById(userId)
-      .then(user => {
-        user.shoppingLists.pull(id);
-        return user.save();
-      })
-      .then(() => {
-        res.sendStatus(204);
-      })
+
+    ShoppingList.findOneAndDelete({ _id: id, user: userId })
+      .then(() => res.sendStatus(204))
       .catch(next);
   });
 
