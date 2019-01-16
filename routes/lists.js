@@ -42,39 +42,47 @@ router
   .patch((req, res, next) => {
     const { id: userId } = req.user;
     const { id } = req.params;
-    User.findById(userId).then(user => {
-      const list = user.shoppingLists.id(id);
-      if (!list) {
-        throw new NotFoundError();
-      }
-      const { name, store: newStore } = req.body;
-      if (name) {
-        list.name = name;
-      }
-      let storePromise = Promise.resolve(list.store);
-      if (newStore) {
-        storePromise = Store.findOneAndUpdate(
-          { googleId: newStore.googleId },
-          newStore,
-          {
-            upsert: true,
-            new: true,
+    const { name, store } = req.body;
+
+    ShoppingList.findOne({ _id: id, user: userId })
+      .populate('store')
+      .then(shoppingList => {
+        if (!shoppingList) {
+          throw new NotFoundError();
+        }
+
+        if (name) {
+          shoppingList.name = name;
+        }
+
+        let newStore = Promise.resolve(shoppingList.store);
+        if (store) {
+          const requiredFields = ['name', 'address', 'googleId'];
+          const missingField = requiredFields.find(field => !(field in store));
+          if (missingField) {
+            throw new ValidationError(missingField, 'Missing field', 422);
           }
-        );
-      }
-      storePromise
-        .then(store => {
-          list.store = store;
-        })
-        .then(() => {
-          return user.save();
-        })
-        .then(user => {
-          const list = user.shoppingLists.id(id);
-          res.json({ shoppingList: list });
-        })
-        .catch(next);
-    });
+
+          newStore = Store.findOneAndUpdate(
+            { googleId: store.googleId },
+            store,
+            {
+              upsert: true,
+              new: true,
+            }
+          );
+        }
+
+        return newStore.then(store => {
+          shoppingList.store = store;
+          return shoppingList.save();
+        });
+      })
+      .then(shoppingList => {
+        res.json({ list: shoppingList });
+      })
+      .catch(next);
+    //TODO: Handle duplicate key value properly PLZ
   })
   .delete((req, res, next) => {
     const { id: userId } = req.user;
