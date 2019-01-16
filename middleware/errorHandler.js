@@ -1,5 +1,5 @@
 'use strict';
-const { HttpError, NotFoundError } = require('../errors');
+const { HttpError, NotFoundError, ValidationError } = require('../errors');
 
 function notFoundHandler(req, res, next) {
   next(new NotFoundError());
@@ -22,6 +22,11 @@ function errorHandler(err, req, res, next) {
 
   const { code, message } = err;
   const error = { code, message };
+
+  if (err instanceof ValidationError) {
+    const { reason, location } = err;
+    Object.assign(error, { reason, location });
+  }
 
   res.status(code).json(error);
 }

@@ -26,7 +26,23 @@ class NotFoundError extends HttpError {
   }
 }
 
+class ValidationError extends HttpError {
+  constructor(location, message, code = 400, ...params) {
+    super(...params);
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, ValidationError);
+    }
+
+    this.message = message;
+    this.location = location;
+    this.code = code;
+    this.reason = 'ValidationError';
+  }
+}
+
 module.exports = {
   HttpError,
   NotFoundError,
+  ValidationError,
 };
