@@ -3,14 +3,14 @@
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 
-const shoppingListSchema = require('./shopping-list');
+const ShoppingList = require('./shopping-list');
 
 const schema = new mongoose.Schema({
   firstName: { type: String, default: '' },
   lastName: { type: String, default: '' },
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  shoppingLists: { type: [shoppingListSchema], default: [] },
+  shoppingLists: { type: [ShoppingList.schema], default: [] },
 });
 
 schema.set('toJSON', {

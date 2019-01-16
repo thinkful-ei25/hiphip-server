@@ -6,8 +6,13 @@ const mongoose = require('mongoose');
 const { HttpError, NotFoundError, ValidationError } = require('../errors');
 
 const User = require('../models/user');
-const List = require('../models/shopping-list');
-const ListItem = require('../models/shopping-list-item');
+const ShoppingList = require('../models/shopping-list');
+/*
+likely to add other models as routes are expanded upon
+- aislelocation model
+- category model
+*/
+
 const router = express.Router();
 const jwtAuth = passport.authenticate('jwt', { session: false });
 
@@ -15,38 +20,108 @@ router.use(express.json());
 router.use(jwtAuth);
 
 //Add an item to a list
-router.route('/').post((req, res, next) => {
-  const { id: userId } = req.user;
-  const { listId } = req.body;
-  if (!mongoose.Types.ObjectId.isValid(listId)) {
-    throw new HttpError(422, `${listId} is not a valid ObjectId`);
-  }
-  const { name, aisleLocation } = req.body;
-  const requiredFields = ['name'];
-  const missingField = requiredFields.find(field => {
-    !(field in req.body);
+router
+  .route('/:listId')
+  .get((req, res, next) => {
+    const { id: userId } = req.user;
+    const { listId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(listId)) {
+      throw new HttpError(422, `${listId} is not a valid ObjectId`);
+    }
+    ShoppingList.findById(listId)
+      .then(list => {
+        if (!list) {
+          throw new NotFoundError();
+        }
+        const items = list.items;
+        res.json({ items });
+      })
+      .catch(next);
+  })
+  .post((req, res, next) => {
+    const { id: userId } = req.user;
+    const { listId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(listId)) {
+      throw new HttpError(422, `${listId} is not a valid ObjectId`);
+    }
+    const { name, aisleLocation } = req.body;
+    const requiredFields = ['name'];
+    const missingField = requiredFields.find(field => {
+      !(field in req.body);
+    });
+    if (missingField) {
+      throw new ValidationError(missingField, 'Missing Field', 422);
+    }
+    let newItem;
+    ShoppingList.findById(listId)
+      .then(list => {
+        if (!list) {
+          throw new NotFoundError();
+        }
+        newItem = list.items.create({
+          name,
+        });
+        list.items.push(newItem);
+        return list.save();
+      })
+      .then(() => {
+        res.json({ item: newItem });
+      })
+      .catch(next);
+  })
+  .patch((req, res, next) => {
+    const { listId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(listId)) {
+      throw new HttpError(422, `${listId} is not a valid ObjectId`);
+    }
+    const { name, isChecked, aisle } = req.body;
   });
-  if (missingField) {
-    throw new ValidationError(missingField, 'Missing Field', 422);
-  }
-  let newItem;
-  User.findById(userId)
-    .then(user => {
-      const list = user.shoppingLists.id(listId);
-      if (!list) {
-        throw new NotFoundError();
-      }
-      newItem = user.shoppingLists.items.create({
-        name,
-        aisleLocation,
-      });
-      list.push(newItem);
-      return user.save();
-    })
-    .then(() => {
-      res.json({ item: newItem });
-    })
-    .catch(next);
-});
 
 module.exports = router;
+
+/*
+Collections:
+  - Users
+  - Stores
+  - ShoppingLists
+  - AisleLocations
+  - Categories
+
+
+  Users:
+    -username
+    -password
+    -id
+    -[ShoppingLists-ids]
+
+  Stores:
+    -name
+    -address
+    -googleId -  TODO
+
+  ShoppingLists:
+    - id
+    - name,
+    - storeId,
+    - [items]
+      - name
+      - isChecked
+      - aisleLocation (objectId)
+
+  AisleLocations:
+    - id
+    - aisleNo
+    - categoryId
+    - storeId
+
+  Categories:
+    - id
+    - name
+    - [items]
+
+
+
+
+
+
+*/

@@ -8,8 +8,9 @@ const shoppingListItemSchema = new mongoose.Schema(
     aisleLocation: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'AisleLocation',
+      default: null,
     },
-    isChecked: { type: Boolean, required: true },
+    isChecked: { type: Boolean, default: false },
   },
   {
     toJSON: {
