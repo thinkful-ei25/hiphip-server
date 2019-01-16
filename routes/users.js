@@ -3,23 +3,19 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const User = require('../models/user');
+const { ValidationError } = require('../errors');
 
 const router = express.Router();
 
 const jsonParser = bodyParser.json();
 
 // Post to register a new user
-router.post('/', jsonParser, (req, res) => {
+router.post('/', jsonParser, (req, res, next) => {
   const requiredFields = ['username', 'password'];
   const missingField = requiredFields.find(field => !(field in req.body));
 
   if (missingField) {
-    return res.status(422).json({
-      code: 422,
-      reason: 'ValidationError',
-      message: 'Missing field',
-      location: missingField,
-    });
+    throw new ValidationError(missingField, 'Missing field', 422);
   }
 
   const stringFields = ['username', 'password', 'firstName', 'lastName'];
@@ -28,12 +24,11 @@ router.post('/', jsonParser, (req, res) => {
   );
 
   if (nonStringField) {
-    return res.status(422).json({
-      code: 422,
-      reason: 'ValidationError',
-      message: 'Incorrect field type: expected string',
-      location: nonStringField,
-    });
+    throw new ValidationError(
+      nonStringField,
+      'Incorrect field type: expected string',
+      422
+    );
   }
 
   const explicityTrimmedFields = ['username', 'password'];
@@ -42,12 +37,11 @@ router.post('/', jsonParser, (req, res) => {
   );
 
   if (nonTrimmedField) {
-    return res.status(422).json({
-      code: 422,
-      reason: 'ValidationError',
-      message: 'Cannot start or end with whitespace',
-      location: nonTrimmedField,
-    });
+    throw new ValidationError(
+      nonTrimmedField,
+      'Cannot start or end with whitespace',
+      422
+    );
   }
 
   const sizedFields = {
@@ -71,14 +65,13 @@ router.post('/', jsonParser, (req, res) => {
   );
 
   if (tooSmallField || tooLargeField) {
-    return res.status(422).json({
-      code: 422,
-      reason: 'ValidationError',
-      message: tooSmallField
+    throw new ValidationError(
+      tooSmallField || tooLargeField,
+      tooSmallField
         ? `Must be at least ${sizedFields[tooSmallField].min} characters long`
         : `Must be at most ${sizedFields[tooLargeField].max} characters long`,
-      location: tooSmallField || tooLargeField,
-    });
+      422
+    );
   }
 
   let { username, password } = req.body;
@@ -88,12 +81,9 @@ router.post('/', jsonParser, (req, res) => {
     .then(count => {
       if (count > 0) {
         // There is an existing user with the same username
-        return Promise.reject({
-          code: 422,
-          reason: 'ValidationError',
-          message: 'Username already taken',
-          location: 'username',
-        });
+        return Promise.reject(
+          new ValidationError('username', 'Username already taken', 422)
+        );
       }
       // If there is no existing user, hash the password
       return User.hashPassword(password);
@@ -107,14 +97,7 @@ router.post('/', jsonParser, (req, res) => {
     .then(user => {
       return res.status(201).json(user);
     })
-    .catch(err => {
-      // Forward validation errors on to the client, otherwise give a 500
-      // error because something unexpected has happened
-      if (err.reason === 'ValidationError') {
-        return res.status(err.code).json(err);
-      }
-      res.status(500).json({ code: 500, message: 'Internal server error' });
-    });
+    .catch(next);
 });
 
 module.exports = router;
