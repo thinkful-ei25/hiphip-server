@@ -25,6 +25,7 @@ router
     }
 
     ShoppingList.findById(id)
+      .populate('store')
       .then(shoppingList => {
         if (!shoppingList) {
           throw new NotFoundError();
@@ -98,7 +99,12 @@ router
   .get((req, res, next) => {
     const { id: userId } = req.user;
     User.findById(userId)
-      .populate('shoppingLists')
+      .populate({
+        path: 'shoppingLists',
+        populate: {
+          path: 'store',
+        },
+      })
       .then(user => {
         const { shoppingLists } = user;
         res.json({ lists: shoppingLists });
