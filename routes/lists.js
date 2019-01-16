@@ -11,23 +11,75 @@ const jwtAuth = passport.authenticate('jwt', { session: false });
 router.use(express.json());
 router.use(jwtAuth);
 
-router.get('/:id', (req, res, next) => {
-  const { id: userId } = req.user;
-  const { id } = req.params;
-  //TODO: check that id is an ObjectId
-  User.findById(userId)
-    .then(user => {
+router
+  .route('/:id')
+  .get((req, res, next) => {
+    const { id: userId } = req.user;
+    const { id } = req.params;
+    //TODO: check that id is an ObjectId
+    User.findById(userId)
+      .then(user => {
+        const list = user.shoppingLists.id(id);
+        if (list) {
+          res.json(list);
+        } else {
+          //TODO: add an actual error here pls
+          throw new Error();
+        }
+      })
+      .catch(next);
+  })
+  .patch((req, res, next) => {
+    const { id: userId } = req.user;
+    const { id } = req.params;
+    User.findById(userId).then(user => {
       const list = user.shoppingLists.id(id);
-      console.log(list);
-      if (list) {
-        res.json(list);
-      } else {
-        //TODO: add an actual error here pls
+      if (!list) {
         throw new Error();
+        //TODO: add an actual error here pls
       }
-    })
-    .catch(next);
-});
+      const { name, store: newStore } = req.body;
+      if (name) {
+        list.name = name;
+      }
+      let storePromise = Promise.resolve(list.store);
+      if (newStore) {
+        storePromise = Store.findOneAndUpdate(
+          { googleId: newStore.googleId },
+          newStore,
+          {
+            upsert: true,
+            new: true,
+          }
+        );
+      }
+      storePromise
+        .then(store => {
+          list.store = store;
+        })
+        .then(() => {
+          return user.save();
+        })
+        .then(user => {
+          const list = user.shoppingLists.id(id);
+          res.json({ shoppingList: list });
+        })
+        .catch(next);
+    });
+  })
+  .delete((req, res, next) => {
+    const { id: userId } = req.user;
+    const { id } = req.params;
+    User.findById(userId)
+      .then(user => {
+        user.shoppingLists.pull(id);
+        return user.save();
+      })
+      .then(() => {
+        res.sendStatus(204);
+      })
+      .catch(next);
+  });
 
 router
   .route('/')
@@ -98,5 +150,3 @@ router
   });
 
 module.exports = router;
-
-//5c3e601d4c6d717f58dd1d83
