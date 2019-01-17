@@ -15,8 +15,8 @@ const listRouter = require('./routes/lists');
 const itemRouter = require('./routes/items');
 const errorHandler = require('./middleware/errorHandler');
 
-const localStrategy = require('./passport/local');
-const jwtStrategy = require('./passport/jwt');
+const localStrategy = require('./passport/localStrategy');
+const jwtStrategy = require('./passport/jwtStrategy');
 
 const app = express();
 
