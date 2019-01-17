@@ -3,10 +3,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const passport = require('passport');
 
-const User = require('../models/user');
-const Store = require('../models/store');
+const User = require('../models/User');
+const Store = require('../models/Store');
 const { HttpError, NotFoundError, ValidationError } = require('../errors');
-const ShoppingList = require('../models/shopping-list');
+const ShoppingList = require('../models/ShoppingList');
 
 const router = express.Router();
 const jwtAuth = passport.authenticate('jwt', { session: false });

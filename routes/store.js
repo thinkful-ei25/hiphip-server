@@ -2,7 +2,7 @@
 const express = require('express');
 const passport = require('passport');
 
-const Store = require('../models/store');
+const Store = require('../models/Store');
 const { ValidationError } = require('../errors');
 
 const router = express.Router();

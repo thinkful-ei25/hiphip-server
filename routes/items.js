@@ -5,8 +5,8 @@ const mongoose = require('mongoose');
 
 const { HttpError, NotFoundError, ValidationError } = require('../errors');
 
-const User = require('../models/user');
-const ShoppingList = require('../models/shopping-list');
+const User = require('../models/User');
+const ShoppingList = require('../models/ShoppingList');
 /*
 likely to add other models as routes are expanded upon
 - aislelocation model
