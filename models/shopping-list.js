@@ -9,7 +9,7 @@ const shoppingListSchema = new mongoose.Schema(
     name: { type: String, required: true },
     store: { type: mongoose.Schema.Types.ObjectId, ref: 'Store' },
     items: { type: [ShoppingListItem], default: [] },
-    userId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
@@ -21,6 +21,7 @@ const shoppingListSchema = new mongoose.Schema(
       transform: (doc, result) => {
         delete result._id;
         delete result.__v;
+        delete result.items;
       },
     },
   }

@@ -6,6 +6,7 @@ const passport = require('passport');
 const User = require('../models/user');
 const Store = require('../models/store');
 const { HttpError, NotFoundError, ValidationError } = require('../errors');
+const ShoppingList = require('../models/shopping-list');
 
 const router = express.Router();
 const jwtAuth = passport.authenticate('jwt', { session: false });
@@ -23,65 +24,73 @@ router
       throw new HttpError(422, `${id} is not a valid ObjectId`);
     }
 
-    User.findById(userId)
-      .then(user => {
-        const list = user.shoppingLists.id(id);
-        if (!list) {
+    ShoppingList.findById(id)
+      .populate('store')
+      .then(shoppingList => {
+        if (!shoppingList) {
           throw new NotFoundError();
         }
 
-        res.json(list);
+        // TODO: see if there is a better way of comparing ObjectIds
+        if (shoppingList.user.toString() !== userId) {
+          throw new NotFoundError();
+        }
+
+        res.json({ list: shoppingList });
       })
       .catch(next);
   })
   .patch((req, res, next) => {
     const { id: userId } = req.user;
     const { id } = req.params;
-    User.findById(userId).then(user => {
-      const list = user.shoppingLists.id(id);
-      if (!list) {
-        throw new NotFoundError();
-      }
-      const { name, store: newStore } = req.body;
-      if (name) {
-        list.name = name;
-      }
-      let storePromise = Promise.resolve(list.store);
-      if (newStore) {
-        storePromise = Store.findOneAndUpdate(
-          { googleId: newStore.googleId },
-          newStore,
-          {
-            upsert: true,
-            new: true,
+    const { name, store } = req.body;
+
+    ShoppingList.findOne({ _id: id, user: userId })
+      .populate('store')
+      .then(shoppingList => {
+        if (!shoppingList) {
+          throw new NotFoundError();
+        }
+
+        if (name) {
+          shoppingList.name = name;
+        }
+
+        let newStore = Promise.resolve(shoppingList.store);
+        if (store) {
+          const requiredFields = ['name', 'address', 'googleId'];
+          const missingField = requiredFields.find(field => !(field in store));
+          if (missingField) {
+            throw new ValidationError(missingField, 'Missing field', 422);
           }
-        );
-      }
-      storePromise
-        .then(store => {
-          list.store = store;
-        })
-        .then(() => {
-          return user.save();
-        })
-        .then(user => {
-          const list = user.shoppingLists.id(id);
-          res.json({ shoppingList: list });
-        })
-        .catch(next);
-    });
+
+          newStore = Store.findOneAndUpdate(
+            { googleId: store.googleId },
+            store,
+            {
+              upsert: true,
+              new: true,
+            }
+          );
+        }
+
+        return newStore.then(store => {
+          shoppingList.store = store;
+          return shoppingList.save();
+        });
+      })
+      .then(shoppingList => {
+        res.json({ list: shoppingList });
+      })
+      .catch(next);
+    //TODO: Handle duplicate key value properly PLZ
   })
   .delete((req, res, next) => {
     const { id: userId } = req.user;
     const { id } = req.params;
-    User.findById(userId)
-      .then(user => {
-        user.shoppingLists.pull(id);
-        return user.save();
-      })
-      .then(() => {
-        res.sendStatus(204);
-      })
+
+    ShoppingList.findOneAndDelete({ _id: id, user: userId })
+      .then(() => res.sendStatus(204))
       .catch(next);
   });
 
@@ -90,13 +99,20 @@ router
   .get((req, res, next) => {
     const { id: userId } = req.user;
     User.findById(userId)
+      .populate({
+        path: 'shoppingLists',
+        populate: {
+          path: 'store',
+        },
+      })
       .then(user => {
         const { shoppingLists } = user;
-        res.json({ shoppingLists });
+        res.json({ lists: shoppingLists });
       })
       .catch(next);
   })
 
+  //
   .post((req, res, next) => {
     const { id: userId } = req.user;
     const { name, store } = req.body;
@@ -105,7 +121,6 @@ router
     if (missingField) {
       throw new ValidationError(missingField, 'Missing field', 422);
     }
-    let newList;
 
     let storePromise = Promise.resolve(null);
 
@@ -125,19 +140,19 @@ router
         }
       );
     }
-
+    let newShoppingList;
     storePromise.then(storeObject => {
-      User.findById(userId)
+      ShoppingList.create({ name, store: storeObject, user: userId })
+        .then(shoppingList => {
+          newShoppingList = shoppingList;
+          return User.findById(userId);
+        })
         .then(user => {
-          newList = user.shoppingLists.create({
-            name,
-            store: storeObject ? storeObject.id : null,
-          });
-          user.shoppingLists.push(newList);
+          user.shoppingLists.push(newShoppingList);
           return user.save();
         })
         .then(() => {
-          res.json({ shoppingList: newList });
+          res.status(201).json({ list: newShoppingList });
         })
         .catch(next);
     });
