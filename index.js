@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const passport = require('passport');
 
 const { PORT, CLIENT_ORIGIN } = require('./config');
-const { dbConnect } = require('./db/db-mongoose');
+const { dbConnect } = require('./db/mongoose');
 
 const usersRouter = require('./routes/users');
 const authRouter = require('./routes/auth');
