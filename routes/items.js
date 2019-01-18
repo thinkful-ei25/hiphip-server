@@ -23,6 +23,7 @@ router.use(jwtAuth);
 router
   .route('/')
   .get((req, res, next) => {
+    console.log('HHEEEYy');
     const { id: userId } = req.user;
     const { listId } = req.params;
 
@@ -43,6 +44,7 @@ router
     const { id: userId } = req.user;
 
     const { listId } = req.params;
+    console.log(listId);
     if (!mongoose.Types.ObjectId.isValid(listId)) {
       throw new HttpError(422, `${listId} is not a valid ObjectId`);
     }
