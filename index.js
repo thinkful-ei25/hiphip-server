@@ -39,7 +39,6 @@ app.use('/api/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/api/stores', storeRouter);
 app.use('/api/lists', listRouter);
-app.use('/api/items', itemRouter);
 app.use(errorHandler);
 
 /* eslint-disable no-console */

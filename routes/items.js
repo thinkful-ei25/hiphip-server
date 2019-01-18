@@ -13,7 +13,7 @@ likely to add other models as routes are expanded upon
 - category model
 */
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 const jwtAuth = passport.authenticate('jwt', { session: false });
 
 router.use(express.json());
@@ -21,10 +21,11 @@ router.use(jwtAuth);
 
 //Add an item to a list
 router
-  .route('/:listId')
+  .route('/')
   .get((req, res, next) => {
     const { id: userId } = req.user;
     const { listId } = req.params;
+
     if (!mongoose.Types.ObjectId.isValid(listId)) {
       throw new HttpError(422, `${listId} is not a valid ObjectId`);
     }
@@ -33,13 +34,14 @@ router
         if (!list) {
           throw new NotFoundError();
         }
-        const items = list.items;
-        res.json({ items });
+        console.log(list);
+        res.json({ items: list.items });
       })
       .catch(next);
   })
   .post((req, res, next) => {
     const { id: userId } = req.user;
+
     const { listId } = req.params;
     if (!mongoose.Types.ObjectId.isValid(listId)) {
       throw new HttpError(422, `${listId} is not a valid ObjectId`);
@@ -70,7 +72,7 @@ router
       .catch(next);
   });
 router
-  .route('/:listId/:id')
+  .route('/:id')
   .patch((req, res, next) => {
     const { listId, id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(listId)) {

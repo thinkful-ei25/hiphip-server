@@ -10,10 +10,12 @@ const ShoppingList = require('../models/shopping-list');
 
 const router = express.Router();
 const jwtAuth = passport.authenticate('jwt', { session: false });
+const itemRouter = require('./items');
 
 router.use(express.json());
 router.use(jwtAuth);
 
+router.use('/:listId/items', itemRouter);
 router
   .route('/:id')
   .get((req, res, next) => {

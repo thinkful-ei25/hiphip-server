@@ -21,7 +21,6 @@ const shoppingListSchema = new mongoose.Schema(
       transform: (doc, result) => {
         delete result._id;
         delete result.__v;
-        delete result.items;
       },
     },
   }
