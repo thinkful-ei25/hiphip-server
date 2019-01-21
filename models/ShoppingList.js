@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose');
 
-const ShoppingListItem = require('./shopping-list-item');
+const ShoppingListItem = require('./ShoppingListItem');
 
 const shoppingListSchema = new mongoose.Schema(
   {

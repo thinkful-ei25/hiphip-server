@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const passport = require('passport');
 
 const { PORT, CLIENT_ORIGIN } = require('./config');
-const { dbConnect } = require('./db/db-mongoose');
+const { dbConnect } = require('./db/mongoose');
 
 const usersRouter = require('./routes/users');
 const authRouter = require('./routes/auth');
@@ -15,8 +15,8 @@ const listRouter = require('./routes/lists');
 const itemRouter = require('./routes/items');
 const errorHandler = require('./middleware/errorHandler');
 
-const localStrategy = require('./passport/local');
-const jwtStrategy = require('./passport/jwt');
+const localStrategy = require('./passport/localStrategy');
+const jwtStrategy = require('./passport/jwtStrategy');
 
 const app = express();
 
