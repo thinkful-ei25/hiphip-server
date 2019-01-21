@@ -7,6 +7,11 @@ const { HttpError, NotFoundError, ValidationError } = require('../errors');
 
 const User = require('../models/User');
 const ShoppingList = require('../models/ShoppingList');
+const {
+  getCategory,
+  findAndUpdateAisleLocation,
+} = require('../logic/itemManagement');
+
 /*
 likely to add other models as routes are expanded upon
 - aislelocation model
@@ -34,7 +39,6 @@ router
         if (!list) {
           throw new NotFoundError();
         }
-        console.log(list);
         res.json({ items: list.items });
       })
       .catch(next);
@@ -54,14 +58,24 @@ router
     if (missingField) {
       throw new ValidationError(missingField, 'Missing Field', 422);
     }
+
+    let list;
     let newItem;
-    ShoppingList.findById(listId)
-      .then(list => {
-        if (!list) {
+    Promise.all([ShoppingList.findById(listId), getCategory(name)])
+      .then(([_list, category]) => {
+        if (!_list) {
           throw new NotFoundError();
         }
+        list = _list;
+
+        return list.store
+          ? findAndUpdateAisleLocation(list.store, category._id, aisleLocation)
+          : null;
+      })
+      .then(aisleLocation => {
         newItem = list.items.create({
           name,
+          aisleLocation: aisleLocation && aisleLocation._id,
         });
         list.items.push(newItem);
         return list.save();
@@ -71,6 +85,7 @@ router
       })
       .catch(next);
   });
+
 router
   .route('/:id')
   .patch((req, res, next) => {
