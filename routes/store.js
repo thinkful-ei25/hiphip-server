@@ -1,42 +1,41 @@
 'use strict';
 const express = require('express');
-const bodyParser = require('body-parser');
+const passport = require('passport');
 
 const Store = require('../models/store');
 const { ValidationError } = require('../errors');
 
 const router = express.Router();
 
-const jsonParser = bodyParser.json();
+const jwtAuth = passport.authenticate('jwt', { session: false });
+router.use(express.json());
+router.use(jwtAuth);
 
-router.post('/', jsonParser, (req, res, next) => {
-  const requiredFields = ['name', 'address'];
+router.post('/', (req, res, next) => {
+  const requiredFields = ['name', 'address', 'googleId'];
   const missingField = requiredFields.find(field => !(field in req.body));
 
   if (missingField) {
     throw new ValidationError(missingField, 'Missing field', 422);
   }
 
-  const { name, address } = req.body;
+  const { name, address, googleId } = req.body;
 
-  const newStore = { name, address };
+  const newStore = { name, address, googleId };
 
   Store.create(newStore)
-    .then(result => {
-      res
-        .location(`${req.originalUrl}/${result.id}`)
-        .status(201)
-        .json(result);
+    .then(store => {
+      res.status(201).json({ store });
     })
-    .catch(err => next(err));
+    .catch(next);
 });
 
 router.get('/', (req, res, next) => {
   Store.find()
-    .then(result => {
-      res.json(result);
+    .then(stores => {
+      res.json({ stores });
     })
-    .catch(err => next(err));
+    .catch(next);
 });
 
 module.exports = router;
