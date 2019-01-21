@@ -94,11 +94,12 @@ router
       throw new HttpError(422, `${listId} is not a valid ObjectId`);
     }
     ShoppingList.findById(listId)
+      .populate('items.aisleLocation')
       .then(list => {
         if (!list) {
           throw new NotFoundError();
         }
-        const { name, isChecked, aisle } = req.body;
+        const { name, isChecked, aisleLocation } = req.body;
         const item = list.items.id(id);
         if (!item) {
           throw new NotFoundError();
@@ -109,12 +110,13 @@ router
         if (isChecked !== item.isChecked) {
           item.isChecked = isChecked;
         }
-        if (aisle) {
-          item.aisle = aisle;
+        if (aisleLocation) {
+          item.aisleLocation.aisleNo = aisleLocation;
         }
-        return list.save();
+
+        return Promise.all([list.save(), item.aisleLocation.save()]);
       })
-      .then(list => {
+      .then(([list]) => {
         const item = list.items.id(id);
         res.json({ item });
       })
