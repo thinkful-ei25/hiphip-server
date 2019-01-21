@@ -35,6 +35,7 @@ router
       throw new HttpError(422, `${listId} is not a valid ObjectId`);
     }
     ShoppingList.findById(listId)
+      .populate('items.aisleLocation', 'aisleNo')
       .then(list => {
         if (!list) {
           throw new NotFoundError();
