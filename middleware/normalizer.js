@@ -1,14 +1,21 @@
-// trim, to lowercase, remove numbers
+const groceryTerms = {
+  gallon: true,
+  quart: true,
+  pound: true,
+  lb: true,
+  kg: true,
+  kilo: true,
+  dozen: true,
+};
 function normalizer(searchString) {
-  const searchArray = searchString.split(' ');
-  const filtered = searchArray.filter(word => {
-    return isNaN(word) ? word.toLowerCase() : null;
-    // const lower = word.toLowerCase();
-    // // console.log(lower);
-    // word = 'worrrdd'
-    // return word;
-  });
+  const searchArray = searchString
+    .replace(/[^\w\s]|_/g, '')
+    .replace(/\s+/g, ' ')
+    .toLowerCase()
+    .split(' ');
+  const filtered = searchArray.filter(word => isNaN(word));
+
   return filtered;
 }
 
-console.log(normalizer('2 black ponies NAMED horse 223Face.'));
+console.log(normalizer('2 black ponies, NAMED horse 223Face.'));
