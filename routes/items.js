@@ -23,7 +23,6 @@ router.use(jwtAuth);
 router
   .route('/')
   .get((req, res, next) => {
-    console.log('HHEEEYy');
     const { id: userId } = req.user;
     const { listId } = req.params;
 

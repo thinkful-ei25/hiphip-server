@@ -24,7 +24,6 @@ const jsonParser = bodyParser.json();
 //   longitude: '-122.399972' }
 router.route('/').get((req, res, next) => {
   const { term, category, latitude, longitude } = req.query;
-  console.log('HELLOOOOO!');
   fetch(
     `https://api.yelp.com/v3/businesses/search?term=${term}&category=${category}&latitude=${latitude}&longitude=${longitude}`,
     {
@@ -35,7 +34,10 @@ router.route('/').get((req, res, next) => {
     }
   )
     .then(res => res.json())
-    .then(json => console.log(json));
+    .then(businesses => {
+      console.log(businesses);
+      res.json(businesses);
+    });
 });
 
 module.exports = router;
