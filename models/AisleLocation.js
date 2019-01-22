@@ -2,17 +2,17 @@
 const mongoose = require('mongoose');
 
 const schema = new mongoose.Schema({
-  categoryId: {
+  category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
     required: true,
   },
-  storeId: {
+  store: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Store',
     required: true,
   },
-  aisleNo: { type: String, default: '' },
+  aisleNo: { type: String, default: null },
 });
 
 schema.set('toJSON', {
