@@ -15,25 +15,22 @@ const groceryTerms = {
   or: true,
 };
 
-function normalizer(req, res, next) {
-  const { name } = req.body;
-  const filteredArray = [];
-  const searchArray = name
+function normalizer(itemName) {
+  const searchArray = itemName
     .replace(/[^\w\s]|_/g, '')
     .replace(/\s+/g, ' ')
     .toLowerCase()
     .split(' ');
-  const filt = searchArray.filter(word => isNaN(word));
-  for (let i = 0; i < filt.length; i++) {
-    if (!groceryTerms.hasOwnProperty(filt[i])) {
-      filteredArray.push(pluralizer.singular(filt[i]));
+  const filtered = searchArray.filter(word => {
+    if (isNaN(word) && !groceryTerms.hasOwnProperty(word)) {
+      return word;
     }
-  }
-  if (filteredArray.length > 1) {
-    req.normalized = name;
+  });
+
+  if (filtered.length > 1) {
+    return itemName;
   } else {
-    req.normalized = filteredArray[0];
+    return pluralizer.singular(filtered[0]);
   }
-  next();
 }
 module.exports = normalizer;
