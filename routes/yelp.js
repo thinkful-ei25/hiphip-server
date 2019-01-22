@@ -8,20 +8,6 @@ const { ValidationError } = require('../errors');
 const router = express.Router();
 
 const jsonParser = bodyParser.json();
-// return fetch(
-//   `${STORE_API_BASE_URL}?term=${searchterm}&category=grocery&latitude=37.786882&longitude=-122.399972`,
-//   {
-//     method: 'GET',
-//     headers: { Authorization: `Bearer ${API_authToken}` },
-//     mode: 'no-cors',
-//   }
-// ).then(res => {
-//   console.log(res);
-// // });
-// { term: 'whole',
-//   category: 'grocery',
-//   latitude: '37.786882',
-//   longitude: '-122.399972' }
 router.route('/').get((req, res, next) => {
   const { term, category, latitude, longitude } = req.query;
   fetch(
