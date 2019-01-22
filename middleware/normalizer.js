@@ -17,7 +17,6 @@ const groceryTerms = {
 
 function normalizer(req, res, next) {
   const { name } = req.body;
-  console.log(name);
   const filteredArray = [];
   const searchArray = name
     .replace(/[^\w\s]|_/g, '')
@@ -30,7 +29,11 @@ function normalizer(req, res, next) {
       filteredArray.push(pluralizer.singular(filt[i]));
     }
   }
-  req.normalized = filteredArray;
+  if (filteredArray.length > 1) {
+    req.normalized = name;
+  } else {
+    req.normalized = filteredArray[0];
+  }
   next();
 }
 module.exports = normalizer;
