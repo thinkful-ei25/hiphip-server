@@ -1,3 +1,4 @@
+const pluralizer = require('pluralize');
 const groceryTerms = {
   gallon: true,
   quart: true,
@@ -14,9 +15,11 @@ const groceryTerms = {
   or: true,
 };
 
-function normalizer(searchString) {
-  filteredArray = [];
-  const searchArray = searchString
+function normalizer(req, res, next) {
+  const { name } = req.body;
+  console.log(name);
+  const filteredArray = [];
+  const searchArray = name
     .replace(/[^\w\s]|_/g, '')
     .replace(/\s+/g, ' ')
     .toLowerCase()
@@ -24,30 +27,10 @@ function normalizer(searchString) {
   const filt = searchArray.filter(word => isNaN(word));
   for (let i = 0; i < filt.length; i++) {
     if (!groceryTerms.hasOwnProperty(filt[i])) {
-      filteredArray.push(filt[i]);
+      filteredArray.push(pluralizer.singular(filt[i]));
     }
   }
-  return filteredArray;
+  req.normalized = filteredArray;
+  next();
 }
-
-// console.log(normalizer('2 black ponies, NAMED horse 223Face.'));
-let input = 'cream cheese';
-if (normalizer(input).length > 1) {
-  console.log(input);
-} else {
-  console.log(normalizer(input));
-}
-
-input = '2% milk';
-if (normalizer(input).length > 1) {
-  console.log(input);
-} else {
-  console.log(normalizer(input).join(''));
-}
-
-input = 'two apples';
-if (normalizer(input).length > 1) {
-  console.log(input);
-} else {
-  console.log(normalizer(input).join(''));
-}
+module.exports = normalizer;
