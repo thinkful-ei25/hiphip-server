@@ -7,6 +7,11 @@ const { HttpError, NotFoundError, ValidationError } = require('../errors');
 
 const User = require('../models/User');
 const ShoppingList = require('../models/ShoppingList');
+const {
+  getCategory,
+  findAndUpdateAisleLocation,
+} = require('../logic/itemManagement');
+
 /*
 likely to add other models as routes are expanded upon
 - aislelocation model
@@ -30,11 +35,11 @@ router
       throw new HttpError(422, `${listId} is not a valid ObjectId`);
     }
     ShoppingList.findById(listId)
+      .populate('items.aisleLocation', 'aisleNo')
       .then(list => {
         if (!list) {
           throw new NotFoundError();
         }
-        console.log(list);
         res.json({ items: list.items });
       })
       .catch(next);
@@ -54,14 +59,24 @@ router
     if (missingField) {
       throw new ValidationError(missingField, 'Missing Field', 422);
     }
+
+    let list;
     let newItem;
-    ShoppingList.findById(listId)
-      .then(list => {
-        if (!list) {
+    Promise.all([ShoppingList.findById(listId), getCategory(name)])
+      .then(([_list, category]) => {
+        if (!_list) {
           throw new NotFoundError();
         }
+        list = _list;
+
+        return list.store
+          ? findAndUpdateAisleLocation(list.store, category._id, aisleLocation)
+          : null;
+      })
+      .then(aisleLocation => {
         newItem = list.items.create({
           name,
+          aisleLocation: aisleLocation && aisleLocation._id,
         });
         list.items.push(newItem);
         return list.save();
@@ -71,6 +86,7 @@ router
       })
       .catch(next);
   });
+
 router
   .route('/:id')
   .patch((req, res, next) => {
@@ -79,11 +95,12 @@ router
       throw new HttpError(422, `${listId} is not a valid ObjectId`);
     }
     ShoppingList.findById(listId)
+      .populate('items.aisleLocation')
       .then(list => {
         if (!list) {
           throw new NotFoundError();
         }
-        const { name, isChecked, aisle } = req.body;
+        const { name, isChecked, aisleLocation } = req.body;
         const item = list.items.id(id);
         if (!item) {
           throw new NotFoundError();
@@ -94,12 +111,13 @@ router
         if (isChecked !== item.isChecked) {
           item.isChecked = isChecked;
         }
-        if (aisle) {
-          item.aisle = aisle;
+        if (aisleLocation) {
+          item.aisleLocation.aisleNo = aisleLocation;
         }
-        return list.save();
+
+        return Promise.all([list.save(), item.aisleLocation.save()]);
       })
-      .then(list => {
+      .then(([list]) => {
         const item = list.items.id(id);
         res.json({ item });
       })

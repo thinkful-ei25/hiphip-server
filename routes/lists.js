@@ -28,6 +28,7 @@ router
 
     ShoppingList.findById(id)
       .populate('store')
+      .populate('items.aisleLocation', 'aisleNo')
       .then(shoppingList => {
         if (!shoppingList) {
           throw new NotFoundError();
