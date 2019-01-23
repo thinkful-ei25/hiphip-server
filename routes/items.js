@@ -11,7 +11,7 @@ const {
   getCategory,
   findAndUpdateAisleLocation,
 } = require('../logic/itemManagement');
-
+const normalizer = require('../logic/normalizer');
 /*
 likely to add other models as routes are expanded upon
 - aislelocation model
@@ -62,8 +62,9 @@ router
 
     let list;
     let newItem;
+    const normalizedName = normalizer(name);
     let aisle;
-    Promise.all([ShoppingList.findById(listId), getCategory(name)])
+    Promise.all([ShoppingList.findById(listId), getCategory(normalizedName)])
       .then(([_list, category]) => {
         if (!_list) {
           throw new NotFoundError();
@@ -97,32 +98,57 @@ router
     if (!mongoose.Types.ObjectId.isValid(listId)) {
       throw new HttpError(422, `${listId} is not a valid ObjectId`);
     }
+    let list;
+    let item;
     ShoppingList.findById(listId)
       .populate('items.aisleLocation')
-      .then(list => {
+      .then(_list => {
+        list = _list;
         if (!list) {
           throw new NotFoundError();
         }
         const { name, isChecked, aisleLocation } = req.body;
-        const item = list.items.id(id);
+        item = list.items.id(id);
         if (!item) {
           throw new NotFoundError();
         }
+
+        if (aisleLocation && !list.store) {
+          throw new HttpError(
+            422,
+            'Cannot update aisle information for a list not associated with a store'
+          );
+        }
+
         if (name) {
           item.name = name;
         }
+
         if (isChecked !== item.isChecked) {
           item.isChecked = isChecked;
         }
-        if (aisleLocation) {
-          item.aisleLocation.aisleNo = aisleLocation;
-        }
 
-        return Promise.all([list.save(), item.aisleLocation.save()]);
+        /* eslint-disable indent */
+        return Promise.resolve(
+          list.store
+            ? getCategory(item.name).then(category =>
+                findAndUpdateAisleLocation(
+                  list.store._id,
+                  category._id,
+                  aisleLocation
+                )
+              )
+            : null
+        );
+        /* eslint-enable indent */
       })
-      .then(([list]) => {
-        const item = list.items.id(id);
-        res.json({ item });
+      .then(_aisleLocation => {
+        item.aisleLocation = _aisleLocation;
+        return list.save();
+      })
+      .then(_list => {
+        const _item = _list.items.id(id);
+        res.json({ item: _item });
       })
       .catch(next);
   })
