@@ -61,20 +61,16 @@ router
 
         let newStore = Promise.resolve(shoppingList.store);
         if (store) {
-          const requiredFields = ['name', 'address', 'googleId'];
+          const requiredFields = ['name', 'address', 'yelpId'];
           const missingField = requiredFields.find(field => !(field in store));
           if (missingField) {
             throw new ValidationError(missingField, 'Missing field', 422);
           }
 
-          newStore = Store.findOneAndUpdate(
-            { googleId: store.googleId },
-            store,
-            {
-              upsert: true,
-              new: true,
-            }
-          );
+          newStore = Store.findOneAndUpdate({ yelpId: store.yelpId }, store, {
+            upsert: true,
+            new: true,
+          });
         }
 
         return newStore.then(store => {
@@ -128,20 +124,16 @@ router
     let storePromise = Promise.resolve(null);
 
     if (store) {
-      const requiredFields = ['name', 'address', 'googleId'];
+      const requiredFields = ['name', 'address', 'yelpId'];
       const missingField = requiredFields.find(field => !(field in store));
       if (missingField) {
         throw new ValidationError(missingField, 'Missing field', 422);
       }
 
-      storePromise = Store.findOneAndUpdate(
-        { googleId: store.googleId },
-        store,
-        {
-          upsert: true,
-          new: true,
-        }
-      );
+      storePromise = Store.findOneAndUpdate({ yelpId: store.yelpId }, store, {
+        upsert: true,
+        new: true,
+      });
     }
     let newShoppingList;
     storePromise.then(storeObject => {
