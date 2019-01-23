@@ -125,7 +125,9 @@ router
 
     if (store) {
       const requiredFields = ['name', 'address', 'yelpId'];
-      const missingField = requiredFields.find(field => !(field in store));
+      const missingField = requiredFields.find(
+        field => !(field in store) && !store[field]
+      );
       if (missingField) {
         throw new ValidationError(missingField, 'Missing field', 422);
       }
