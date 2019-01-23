@@ -4,8 +4,8 @@ const mongoose = require('mongoose');
 
 const schema = new mongoose.Schema({
   name: { type: String, required: true },
-  address: { type: String, required: true },
-  googleId: { type: String, required: true, unique: true },
+  address: { type: Object, required: true },
+  yelpId: { type: String, required: true, unique: true },
 });
 
 schema.set('toJSON', {

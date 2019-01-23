@@ -12,16 +12,16 @@ router.use(express.json());
 router.use(jwtAuth);
 
 router.post('/', (req, res, next) => {
-  const requiredFields = ['name', 'address', 'googleId'];
+  const requiredFields = ['name', 'address', 'yelpId'];
   const missingField = requiredFields.find(field => !(field in req.body));
 
   if (missingField) {
     throw new ValidationError(missingField, 'Missing field', 422);
   }
 
-  const { name, address, googleId } = req.body;
+  const { name, address, yelpId } = req.body;
 
-  const newStore = { name, address, googleId };
+  const newStore = { name, address, yelpId };
 
   Store.create(newStore)
     .then(store => {
