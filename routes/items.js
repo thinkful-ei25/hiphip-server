@@ -11,7 +11,7 @@ const {
   getCategory,
   findAndUpdateAisleLocation,
 } = require('../logic/itemManagement');
-
+const normalizer = require('../logic/normalizer');
 /*
 likely to add other models as routes are expanded upon
 - aislelocation model
@@ -62,7 +62,9 @@ router
 
     let list;
     let newItem;
-    Promise.all([ShoppingList.findById(listId), getCategory(name)])
+    const normalizedName = normalizer(name);
+
+    Promise.all([ShoppingList.findById(listId), getCategory(normalizedName)])
       .then(([_list, category]) => {
         if (!_list) {
           throw new NotFoundError();
