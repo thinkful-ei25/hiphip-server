@@ -63,7 +63,7 @@ router
     let list;
     let newItem;
     const normalizedName = normalizer(name);
-
+    let aisle;
     Promise.all([ShoppingList.findById(listId), getCategory(normalizedName)])
       .then(([_list, category]) => {
         if (!_list) {
@@ -76,6 +76,7 @@ router
           : null;
       })
       .then(aisleLocation => {
+        aisle = aisleLocation;
         newItem = list.items.create({
           name,
           aisleLocation: aisleLocation && aisleLocation._id,
@@ -84,6 +85,7 @@ router
         return list.save();
       })
       .then(() => {
+        newItem.aisleLocation = aisle;
         res.json({ item: newItem });
       })
       .catch(next);
