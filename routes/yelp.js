@@ -21,7 +21,6 @@ router.route('/').get((req, res, next) => {
   )
     .then(res => res.json())
     .then(businesses => {
-      console.log(businesses);
       res.json(businesses);
     });
 });
