@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fetch = require('node-fetch');
 
-const { API_AUTH_TOKEN } = require('../config');
+const { YELP_AUTH_TOKEN } = require('../config');
 
 const router = express.Router();
 
@@ -14,7 +14,7 @@ router.route('/coords').get((req, res, next) => {
     {
       method: 'get',
       headers: {
-        Authorization: `Bearer ${API_AUTH_TOKEN}`,
+        Authorization: `Bearer ${YELP_AUTH_TOKEN}`,
       },
     }
   )
@@ -32,7 +32,7 @@ router.route('/location').get((req, res, next) => {
     {
       method: 'get',
       headers: {
-        Authorization: `Bearer ${API_AUTH_TOKEN}`,
+        Authorization: `Bearer ${YELP_AUTH_TOKEN}`,
       },
     }
   )
