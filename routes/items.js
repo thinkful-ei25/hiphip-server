@@ -112,9 +112,14 @@ router
           aisleLocation: aisleLocation && aisleLocation._id,
           next: null,
         });
-        const lastItem = list.items.find(item => !item.next);
+        const lastItem = list.items.findIndex(item => !item.next);
+        if (lastItem !== -1) {
+          list.items[lastItem].next = list.items.length;
+        }
+        if (lastItem === -1) {
+          list.head = 0;
+        }
         list.items.push(newItem);
-        list.items[lastItem].next = list.items.length;
         return list.save();
       })
       .then(() => {
@@ -123,7 +128,6 @@ router
       })
       .catch(next);
   });
-
 router
   .route('/:id')
   .patch((req, res, next) => {
