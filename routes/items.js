@@ -195,13 +195,12 @@ router
     ShoppingList.findOne({ user, _id: listId })
       .then(list => {
         const { newItems, head } = deleteItem(list.items, id, list.head);
-        console.log('new items:', newItems, 'head', head);
         list.items = newItems;
         list.head = head;
         return list.save();
       })
-      .then(() => {
-        res.sendStatus(204);
+      .then(list => {
+        res.json(list);
       })
       .catch(next);
   });

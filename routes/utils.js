@@ -73,6 +73,8 @@ function deleteItem(items, itemId, head) {
     head = -1;
     return { newItems, head };
   }
+  console.log(items);
+  console.log(itemIndex, head);
   if (itemIndex === head) {
     head = items[itemIndex].next;
   } else {
@@ -80,6 +82,7 @@ function deleteItem(items, itemId, head) {
     items[prevItemIndex].next = items[itemIndex].next;
   }
   const newItems = removeItem(items, head);
+  console.log(newItems, head);
   return { newItems, head };
 }
 module.exports = { moveItem, deleteItem };
