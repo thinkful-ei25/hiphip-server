@@ -51,16 +51,40 @@ function moveItem(items, itemId, head, down = false) {
   newItems[itemIndex].next = newNext;
   return { newItems, head };
 }
-function removeItem(items, head) {
+
+//for every item after the item i'm deleting add one to next (except the last one)
+function removeItem(items, head, deletedIndex) {
   const manSortItems = [];
   let currentIndex = head;
+  //for each one, push it in, if index is equal to skip, if greater than, subtract one from next
+  items.forEach((item, index) => {
+    if (index < deletedIndex) {
+      manSortItems.push(item);
+    } else if (index === items.length) {
+      manSortItems.push(item);
+    } else if (index > deletedIndex) {
+      item.next -= 1;
+      manSortItems.push(item);
+    }
+  });
+
   while (items[currentIndex]) {
     manSortItems.push(items[currentIndex]);
     currentIndex = items[currentIndex].next;
   }
   return manSortItems;
 }
-
+function isEmpty(items, head, deletedIndex) {
+  let empty = true;
+  items.forEach(item => {
+    if (items[head] === item && head === deletedIndex) {
+      return;
+    } else if (item.next) {
+      empty = false;
+    }
+  });
+  return empty;
+}
 function deleteItem(items, itemId, head) {
   let itemIndex;
   items.forEach((item, i) => {
@@ -75,14 +99,18 @@ function deleteItem(items, itemId, head) {
   }
   console.log(items);
   console.log(itemIndex, head);
-  if (itemIndex === head) {
+  if (isEmpty(items)) {
+    head = -1;
+  } else if (itemIndex === head) {
     head = items[itemIndex].next;
   } else {
     let prevItemIndex = findPrevItemIndex(items, itemIndex);
     items[prevItemIndex].next = items[itemIndex].next;
   }
-  const newItems = removeItem(items, head);
+
+  // const newItems = removeItem(items, head);
+  const newItems = items;
   console.log(newItems, head);
-  return { newItems, head };
+  return { newItems, head, itemIndex };
 }
 module.exports = { moveItem, deleteItem };
