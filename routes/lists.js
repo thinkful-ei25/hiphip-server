@@ -61,7 +61,7 @@ router
 
         let newStore = Promise.resolve(shoppingList.store);
         if (store) {
-          const requiredFields = ['name', 'address', 'yelpId'];
+          const requiredFields = ['name', 'address', 'yelpId', 'coordinates'];
           const missingField = requiredFields.find(field => !(field in store));
           if (missingField) {
             throw new ValidationError(missingField, 'Missing field', 422);
@@ -124,7 +124,7 @@ router
     let storePromise = Promise.resolve(null);
 
     if (store) {
-      const requiredFields = ['name', 'address', 'yelpId'];
+      const requiredFields = ['name', 'address', 'yelpId', 'coordinates'];
       const missingField = requiredFields.find(
         field => !(field in store) && !store[field]
       );
