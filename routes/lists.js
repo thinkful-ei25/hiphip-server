@@ -16,6 +16,7 @@ router.use(express.json());
 router.use(jwtAuth);
 
 router.use('/:listId/items', itemRouter);
+
 router
   .route('/:id')
   .get((req, res, next) => {

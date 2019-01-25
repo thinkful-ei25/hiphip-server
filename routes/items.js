@@ -20,13 +20,45 @@ likely to add other models as routes are expanded upon
 
 const router = express.Router({ mergeParams: true });
 const jwtAuth = passport.authenticate('jwt', { session: false });
-
+const { moveItem, deleteItem } = require('./utils');
 router.use(express.json());
 router.use(jwtAuth);
 
 //Add an item to a list
 router
   .route('/')
+  .patch((req, res, next) => {
+    const { id: user } = req.user;
+    const { listId } = req.params;
+    const { direction, itemId } = req.body;
+    const requiredFields = ['direction', 'itemId'];
+    const missingField = requiredFields.find(field => !(field in req.body));
+    if (missingField) {
+      throw new ValidationError(missingField, 'Missing Field', 422);
+    }
+    if (!mongoose.Types.ObjectId.isValid(listId)) {
+      throw new HttpError(422, `${listId} is not a valid ObjectId`);
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(itemId)) {
+      throw new HttpError(422, `${itemId} is not a valid ObjectId`);
+    }
+
+    ShoppingList.findOne({ user, _id: listId })
+      .then(list => {
+        let movedList;
+        if (direction === 'up') {
+          movedList = moveItem(list.items, itemId, list.head);
+        } else {
+          movedList = moveItem(list.items, itemId, list.head, true);
+        }
+        list.items = movedList.newItems;
+        list.head = movedList.head;
+        return list.save();
+      })
+      .then(newList => res.json(newList))
+      .catch(next);
+  })
   .get((req, res, next) => {
     const { id: userId } = req.user;
     const { listId } = req.params;
@@ -51,11 +83,9 @@ router
     if (!mongoose.Types.ObjectId.isValid(listId)) {
       throw new HttpError(422, `${listId} is not a valid ObjectId`);
     }
-    const { name, aisleLocation } = req.body;
+    const { name, aisleLocation, next: nextItem } = req.body;
     const requiredFields = ['name'];
-    const missingField = requiredFields.find(field => {
-      !(field in req.body);
-    });
+    const missingField = requiredFields.find(field => !(field in req.body));
     if (missingField) {
       throw new ValidationError(missingField, 'Missing Field', 422);
     }
@@ -80,8 +110,11 @@ router
         newItem = list.items.create({
           name,
           aisleLocation: aisleLocation && aisleLocation._id,
+          next: null,
         });
+        const lastItem = list.items.find(item => !item.next);
         list.items.push(newItem);
+        list.items[lastItem].next = list.items.length;
         return list.save();
       })
       .then(() => {
@@ -154,9 +187,13 @@ router
   })
   .delete((req, res, next) => {
     const { listId, id } = req.params;
-    ShoppingList.findById(listId)
+    const { id: user } = req.user;
+    ShoppingList.findOne({ user, _id: listId })
       .then(list => {
-        list.items.pull(id);
+        const { newItems, head } = deleteItem(list.items, id, list.head);
+        console.log('new items:', newItems, 'head', head);
+        list.items = newItems;
+        list.head = head;
         return list.save();
       })
       .then(() => {

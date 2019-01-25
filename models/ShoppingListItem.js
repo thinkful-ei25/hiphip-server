@@ -11,6 +11,7 @@ const shoppingListItemSchema = new mongoose.Schema(
       default: null,
     },
     isChecked: { type: Boolean, default: false },
+    next: { type: Number, require: true, default: null },
   },
   {
     toJSON: {
