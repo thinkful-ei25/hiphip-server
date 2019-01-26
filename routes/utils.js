@@ -49,8 +49,12 @@ function moveItem(items, itemId, head, down = false) {
   newItems[prevPrevItemIndex].next = newItems[prevItemIndex].next;
   newItems[prevItemIndex].next = newItems[itemIndex].next;
   newItems[itemIndex].next = newNext;
-
-  return { newItems, head };
+  console.log(newItems, head);
+  const sortedItems = sortItems(newItems, head);
+  console.log(sortedItems);
+  head = 0;
+  // console.log(sortItems(newItems, head));
+  return { sortedItems, head };
 }
 
 //for every item after the item i'm deleting add one to next (except the last one)
@@ -88,7 +92,7 @@ function deleteItem(items, itemId, head) {
     let prevItemIndex = findPrevItemIndex(items, itemIndex);
     items[prevItemIndex].next = items[itemIndex].next;
   }
-
+  console.log(items, head);
   const newItems = sortItems(items, head);
   head = 0;
   return { newItems, head, itemIndex };

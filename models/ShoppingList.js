@@ -14,7 +14,6 @@ const shoppingListSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
-    head: { type: Number, required: true, default: 0 },
   },
   {
     toJSON: {

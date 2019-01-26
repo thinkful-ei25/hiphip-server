@@ -30,8 +30,8 @@ router
   .patch((req, res, next) => {
     const { id: user } = req.user;
     const { listId } = req.params;
-    const { direction, itemId } = req.body;
-    const requiredFields = ['direction', 'itemId'];
+    const { direction, index } = req.body;
+    const requiredFields = ['direction', 'index'];
     const missingField = requiredFields.find(field => !(field in req.body));
     if (missingField) {
       throw new ValidationError(missingField, 'Missing Field', 422);
@@ -39,24 +39,26 @@ router
     if (!mongoose.Types.ObjectId.isValid(listId)) {
       throw new HttpError(422, `${listId} is not a valid ObjectId`);
     }
-
-    if (!mongoose.Types.ObjectId.isValid(itemId)) {
-      throw new HttpError(422, `${itemId} is not a valid ObjectId`);
-    }
-
     ShoppingList.findOne({ user, _id: listId })
       .then(list => {
-        let movedList;
-        if (direction === 'up') {
-          movedList = moveItem(list.items, itemId, list.head);
-        } else {
-          movedList = moveItem(list.items, itemId, list.head, true);
+        const reordered = list.items.slice();
+        const last = reordered.length - 1;
+        if (direction === 'up' && index !== 0) {
+          const temp = reordered[index - 1];
+          reordered[index - 1] = reordered[index];
+          reordered[index] = temp;
         }
-        list.items = movedList.newItems;
-        list.head = movedList.head;
+        if (direction === 'down' && index !== last) {
+          const temp = reordered[index + 1];
+          reordered[index + 1] = reordered[index];
+          reordered[index] = temp;
+        }
+        list.items = reordered;
         return list.save();
       })
-      .then(newList => res.json(newList))
+      .then(newList => {
+        res.json(newList);
+      })
       .catch(next);
   })
   .get((req, res, next) => {
@@ -110,15 +112,7 @@ router
         newItem = list.items.create({
           name,
           aisleLocation: aisleLocation && aisleLocation._id,
-          next: null,
         });
-        const lastItem = list.items.findIndex(item => !item.next);
-        if (lastItem !== -1) {
-          list.items[lastItem].next = list.items.length;
-        }
-        if (lastItem === -1) {
-          list.head = 0;
-        }
         list.items.push(newItem);
         return list.save();
       })
@@ -194,9 +188,13 @@ router
     const { id: user } = req.user;
     ShoppingList.findOne({ user, _id: listId })
       .then(list => {
-        const { newItems, head } = deleteItem(list.items, id, list.head);
-        list.items = newItems;
-        list.head = head;
+        let index;
+        list.items.forEach((item, i) => {
+          if (item.id === id) {
+            index = i;
+          }
+        });
+        list.items.splice(index, 1);
         return list.save();
       })
       .then(list => {
