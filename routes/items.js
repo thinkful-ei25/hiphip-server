@@ -20,7 +20,6 @@ likely to add other models as routes are expanded upon
 
 const router = express.Router({ mergeParams: true });
 const jwtAuth = passport.authenticate('jwt', { session: false });
-const { moveItem, deleteItem } = require('./utils');
 router.use(express.json());
 router.use(jwtAuth);
 
