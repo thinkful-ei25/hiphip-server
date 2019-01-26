@@ -26,40 +26,6 @@ router.use(jwtAuth);
 //Add an item to a list
 router
   .route('/')
-  .patch((req, res, next) => {
-    const { id: user } = req.user;
-    const { listId } = req.params;
-    const { direction, index } = req.body;
-    const requiredFields = ['direction', 'index'];
-    const missingField = requiredFields.find(field => !(field in req.body));
-    if (missingField) {
-      throw new ValidationError(missingField, 'Missing Field', 422);
-    }
-    if (!mongoose.Types.ObjectId.isValid(listId)) {
-      throw new HttpError(422, `${listId} is not a valid ObjectId`);
-    }
-    ShoppingList.findOne({ user, _id: listId })
-      .then(list => {
-        const reordered = list.items.slice();
-        const last = reordered.length - 1;
-        if (direction === 'up' && index !== 0) {
-          const temp = reordered[index - 1];
-          reordered[index - 1] = reordered[index];
-          reordered[index] = temp;
-        }
-        if (direction === 'down' && index !== last) {
-          const temp = reordered[index + 1];
-          reordered[index + 1] = reordered[index];
-          reordered[index] = temp;
-        }
-        list.items = reordered;
-        return list.save();
-      })
-      .then(newList => {
-        res.json(newList);
-      })
-      .catch(next);
-  })
   .get((req, res, next) => {
     const { id: userId } = req.user;
     const { listId } = req.params;
@@ -84,7 +50,7 @@ router
     if (!mongoose.Types.ObjectId.isValid(listId)) {
       throw new HttpError(422, `${listId} is not a valid ObjectId`);
     }
-    const { name, aisleLocation, next: nextItem } = req.body;
+    const { name, aisleLocation } = req.body;
     const requiredFields = ['name'];
     const missingField = requiredFields.find(field => !(field in req.body));
     if (missingField) {
@@ -120,17 +86,53 @@ router
         res.json({ item: newItem });
       })
       .catch(next);
+  })
+  .patch((req, res, next) => {
+    const { id: user } = req.user;
+    const { listId } = req.params;
+    const { direction, index } = req.body;
+    const requiredFields = ['direction', 'index'];
+    const missingField = requiredFields.find(field => !(field in req.body));
+    if (missingField) {
+      throw new ValidationError(missingField, 'Missing Field', 422);
+    }
+    if (!mongoose.Types.ObjectId.isValid(listId)) {
+      throw new HttpError(422, `${listId} is not a valid ObjectId`);
+    }
+    ShoppingList.findOne({ user, _id: listId })
+      .populate('items.aisleLocation', 'aisleNo')
+      .then(list => {
+        const reordered = list.items.slice();
+        const last = reordered.length - 1;
+        if (direction === 'up' && index !== 0) {
+          const temp = reordered[index - 1];
+          reordered[index - 1] = reordered[index];
+          reordered[index] = temp;
+        }
+        if (direction === 'down' && index !== last) {
+          const temp = reordered[index + 1];
+          reordered[index + 1] = reordered[index];
+          reordered[index] = temp;
+        }
+        list.items = reordered;
+        return list.save();
+      })
+      .then(newList => {
+        res.json(newList);
+      })
+      .catch(next);
   });
 router
   .route('/:id')
   .patch((req, res, next) => {
+    const { id: user } = req.user;
     const { listId, id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(listId)) {
       throw new HttpError(422, `${listId} is not a valid ObjectId`);
     }
     let list;
     let item;
-    ShoppingList.findById(listId)
+    ShoppingList.findOne({ user, _id: listId })
       .populate('items.aisleLocation')
       .then(_list => {
         list = _list;
@@ -186,6 +188,7 @@ router
     const { listId, id } = req.params;
     const { id: user } = req.user;
     ShoppingList.findOne({ user, _id: listId })
+      .populate('items.aisleLocation', 'aisleNo')
       .then(list => {
         let index;
         list.items.forEach((item, i) => {
@@ -193,7 +196,9 @@ router
             index = i;
           }
         });
-        list.items.splice(index, 1);
+        if (index) {
+          list.items.splice(index, 1);
+        }
         return list.save();
       })
       .then(list => {
