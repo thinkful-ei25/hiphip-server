@@ -20,7 +20,6 @@ likely to add other models as routes are expanded upon
 
 const router = express.Router({ mergeParams: true });
 const jwtAuth = passport.authenticate('jwt', { session: false });
-
 router.use(express.json());
 router.use(jwtAuth);
 
@@ -53,9 +52,7 @@ router
     }
     const { name, aisleLocation } = req.body;
     const requiredFields = ['name'];
-    const missingField = requiredFields.find(field => {
-      !(field in req.body);
-    });
+    const missingField = requiredFields.find(field => !(field in req.body));
     if (missingField) {
       throw new ValidationError(missingField, 'Missing Field', 422);
     }
@@ -89,18 +86,53 @@ router
         res.json({ item: newItem });
       })
       .catch(next);
+  })
+  .patch((req, res, next) => {
+    const { id: user } = req.user;
+    const { listId } = req.params;
+    const { direction, index } = req.body;
+    const requiredFields = ['direction', 'index'];
+    const missingField = requiredFields.find(field => !(field in req.body));
+    if (missingField) {
+      throw new ValidationError(missingField, 'Missing Field', 422);
+    }
+    if (!mongoose.Types.ObjectId.isValid(listId)) {
+      throw new HttpError(422, `${listId} is not a valid ObjectId`);
+    }
+    ShoppingList.findOne({ user, _id: listId })
+      .populate('items.aisleLocation', 'aisleNo')
+      .then(list => {
+        const reordered = list.items.slice();
+        const last = reordered.length - 1;
+        if (direction === 'up' && index !== 0) {
+          const temp = reordered[index - 1];
+          reordered[index - 1] = reordered[index];
+          reordered[index] = temp;
+        }
+        if (direction === 'down' && index !== last) {
+          const temp = reordered[index + 1];
+          reordered[index + 1] = reordered[index];
+          reordered[index] = temp;
+        }
+        list.items = reordered;
+        return list.save();
+      })
+      .then(newList => {
+        res.json(newList);
+      })
+      .catch(next);
   });
-
 router
   .route('/:id')
   .patch((req, res, next) => {
+    const { id: user } = req.user;
     const { listId, id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(listId)) {
       throw new HttpError(422, `${listId} is not a valid ObjectId`);
     }
     let list;
     let item;
-    ShoppingList.findById(listId)
+    ShoppingList.findOne({ user, _id: listId })
       .populate('items.aisleLocation')
       .then(_list => {
         list = _list;
@@ -154,13 +186,23 @@ router
   })
   .delete((req, res, next) => {
     const { listId, id } = req.params;
-    ShoppingList.findById(listId)
+    const { id: user } = req.user;
+    ShoppingList.findOne({ user, _id: listId })
+      .populate('items.aisleLocation', 'aisleNo')
       .then(list => {
-        list.items.pull(id);
+        let index;
+        list.items.forEach((item, i) => {
+          if (item.id === id) {
+            index = i;
+          }
+        });
+        if (index) {
+          list.items.splice(index, 1);
+        }
         return list.save();
       })
-      .then(() => {
-        res.sendStatus(204);
+      .then(list => {
+        res.json(list);
       })
       .catch(next);
   });
