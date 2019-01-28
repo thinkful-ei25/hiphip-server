@@ -59,18 +59,19 @@ router
 
     let list;
     let newItem;
-    const normalizedName = normalizer(name);
     let aisle;
-    Promise.all([ShoppingList.findById(listId), getCategory(normalizedName)])
+    Promise.all([ShoppingList.findById(listId), getCategory(normalizer(name))])
       .then(([_list, category]) => {
         if (!_list) {
           throw new NotFoundError();
         }
         list = _list;
 
-        return list.store
-          ? findAndUpdateAisleLocation(list.store, category._id, aisleLocation)
-          : null;
+        return findAndUpdateAisleLocation(
+          list.store,
+          category._id,
+          aisleLocation
+        );
       })
       .then(aisleLocation => {
         aisle = aisleLocation;
