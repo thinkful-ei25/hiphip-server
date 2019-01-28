@@ -27,7 +27,7 @@ router
       throw new HttpError(422, `${id} is not a valid ObjectId`);
     }
 
-    ShoppingList.findById(id)
+    ShoppingList.findById({ _id: id, user })
       .populate('store')
       .populate('items.aisleLocation', 'aisleNo')
       .then(shoppingList => {

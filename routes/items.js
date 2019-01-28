@@ -45,7 +45,7 @@ router
   })
   .post((req, res, next) => {
     const { id: user } = req.user;
-
+    console.log(user);
     const { listId } = req.params;
     if (!mongoose.Types.ObjectId.isValid(listId)) {
       throw new HttpError(422, `${listId} is not a valid ObjectId`);
@@ -62,7 +62,7 @@ router
     const normalizedName = normalizer(name);
     let aisle;
     Promise.all([
-      ShoppingList.findOne({ user, listId }),
+      ShoppingList.findOne({ user, _id: listId }),
       getCategory(normalizedName),
     ])
       .then(([_list, category]) => {
