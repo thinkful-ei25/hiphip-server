@@ -20,7 +20,7 @@ router.use('/:listId/items', itemRouter);
 router
   .route('/:id')
   .get((req, res, next) => {
-    const { id: userId } = req.user;
+    const { id: user } = req.user;
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -36,7 +36,7 @@ router
         }
 
         // TODO: see if there is a better way of comparing ObjectIds
-        if (shoppingList.user.toString() !== userId) {
+        if (shoppingList.user.toString() !== user) {
           throw new NotFoundError();
         }
 
@@ -45,11 +45,11 @@ router
       .catch(next);
   })
   .patch((req, res, next) => {
-    const { id: userId } = req.user;
+    const { id: user } = req.user;
     const { id } = req.params;
     const { name, store } = req.body;
 
-    ShoppingList.findOne({ _id: id, user: userId })
+    ShoppingList.findOne({ _id: id, user })
       .populate('store')
       .then(shoppingList => {
         if (!shoppingList) {
@@ -86,10 +86,10 @@ router
     //TODO: Handle duplicate key value properly PLZ
   })
   .delete((req, res, next) => {
-    const { id: userId } = req.user;
+    const { id: user } = req.user;
     const { id } = req.params;
 
-    ShoppingList.findOneAndDelete({ _id: id, user: userId })
+    ShoppingList.findOneAndDelete({ _id: id, user })
       .then(() => res.sendStatus(204))
       .catch(next);
   });
@@ -97,8 +97,8 @@ router
 router
   .route('/')
   .get((req, res, next) => {
-    const { id: userId } = req.user;
-    User.findById(userId)
+    const { id: user } = req.user;
+    User.findById(user)
       .populate({
         path: 'shoppingLists',
         populate: {
@@ -114,7 +114,7 @@ router
 
   //
   .post((req, res, next) => {
-    const { id: userId } = req.user;
+    const { id: user } = req.user;
     const { name, store } = req.body;
     const requiredFields = ['name'];
     const missingField = requiredFields.find(field => !(field in req.body));
@@ -140,10 +140,10 @@ router
     }
     let newShoppingList;
     storePromise.then(storeObject => {
-      ShoppingList.create({ name, store: storeObject, user: userId })
+      ShoppingList.create({ name, store: storeObject, user })
         .then(shoppingList => {
           newShoppingList = shoppingList;
-          return User.findById(userId);
+          return User.findById(user);
         })
         .then(user => {
           user.shoppingLists.push(newShoppingList);

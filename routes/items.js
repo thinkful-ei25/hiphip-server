@@ -27,13 +27,13 @@ router.use(jwtAuth);
 router
   .route('/')
   .get((req, res, next) => {
-    const { id: userId } = req.user;
+    const { id: user } = req.user;
     const { listId } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(listId)) {
       throw new HttpError(422, `${listId} is not a valid ObjectId`);
     }
-    ShoppingList.findById(listId)
+    ShoppingList.findOne({ user, listId })
       .populate('items.aisleLocation', 'aisleNo')
       .then(list => {
         if (!list) {
@@ -44,7 +44,7 @@ router
       .catch(next);
   })
   .post((req, res, next) => {
-    const { id: userId } = req.user;
+    const { id: user } = req.user;
 
     const { listId } = req.params;
     if (!mongoose.Types.ObjectId.isValid(listId)) {
@@ -61,7 +61,10 @@ router
     let newItem;
     const normalizedName = normalizer(name);
     let aisle;
-    Promise.all([ShoppingList.findById(listId), getCategory(normalizedName)])
+    Promise.all([
+      ShoppingList.findOne({ user, listId }),
+      getCategory(normalizedName),
+    ])
       .then(([_list, category]) => {
         if (!_list) {
           throw new NotFoundError();
