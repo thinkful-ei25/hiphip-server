@@ -146,13 +146,6 @@ router
           throw new NotFoundError();
         }
 
-        if (aisleLocation && !list.store) {
-          throw new HttpError(
-            422,
-            'Cannot update aisle information for a list not associated with a store'
-          );
-        }
-
         if (name) {
           item.name = name;
         }
@@ -163,15 +156,13 @@ router
 
         /* eslint-disable indent */
         return Promise.resolve(
-          list.store
-            ? getCategory(item.name).then(category =>
-                findAndUpdateAisleLocation(
-                  list.store._id,
-                  category._id,
-                  aisleLocation
-                )
-              )
-            : null
+          getCategory(item.name).then(category =>
+            findAndUpdateAisleLocation(
+              list.store && list.store._id,
+              category._id,
+              aisleLocation
+            )
+          )
         );
         /* eslint-enable indent */
       })
