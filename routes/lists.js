@@ -112,12 +112,13 @@ router
       .catch(next);
   })
 
-  //
   .post((req, res, next) => {
     const { id: userId } = req.user;
     const { name, store } = req.body;
     const requiredFields = ['name'];
-    const missingField = requiredFields.find(field => !(field in req.body));
+    const missingField = requiredFields.find(
+      field => !(field in req.body) || req.body[field] === ''
+    );
     if (missingField) {
       throw new ValidationError(missingField, 'Missing field', 422);
     }
