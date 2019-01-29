@@ -163,7 +163,7 @@ router
         /* eslint-disable indent */
         return Promise.resolve(
           list.store
-            ? getCategory(item.name).then(category =>
+            ? getCategory(normalizer(item.name)).then(category =>
                 findAndUpdateAisleLocation(
                   list.store._id,
                   category._id,
