@@ -58,11 +58,10 @@ router
 
     let list;
     let newItem;
-    const normalizedName = normalizer(name);
     let aisle;
     Promise.all([
       ShoppingList.findOne({ user, _id: listId }),
-      getCategory(normalizedName),
+      getCategory(normalizer(name)),
     ])
       .then(([_list, category]) => {
         if (!_list) {
@@ -70,9 +69,11 @@ router
         }
         list = _list;
 
-        return list.store
-          ? findAndUpdateAisleLocation(list.store, category._id, aisleLocation)
-          : null;
+        return findAndUpdateAisleLocation(
+          list.store,
+          category._id,
+          aisleLocation
+        );
       })
       .then(aisleLocation => {
         aisle = aisleLocation;
@@ -147,13 +148,6 @@ router
           throw new NotFoundError();
         }
 
-        if (aisleLocation && !list.store) {
-          throw new HttpError(
-            422,
-            'Cannot update aisle information for a list not associated with a store'
-          );
-        }
-
         if (name) {
           item.name = name;
         }
@@ -164,15 +158,13 @@ router
 
         /* eslint-disable indent */
         return Promise.resolve(
-          list.store
-            ? getCategory(normalizer(item.name)).then(category =>
-                findAndUpdateAisleLocation(
-                  list.store._id,
-                  category._id,
-                  aisleLocation
-                )
-              )
-            : null
+          getCategory(item.name).then(category =>
+            findAndUpdateAisleLocation(
+              list.store && list.store._id,
+              category._id,
+              aisleLocation
+            )
+          )
         );
         /* eslint-enable indent */
       })
