@@ -198,7 +198,7 @@ router
             index = i;
           }
         });
-        if (index) {
+        if (index >= 0) {
           list.items.splice(index, 1);
         }
         return list.save();
