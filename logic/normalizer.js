@@ -1,3 +1,5 @@
+'use strict';
+
 const pluralizer = require('pluralize');
 const groceryTerms = {
   gallon: true,
@@ -16,6 +18,9 @@ const groceryTerms = {
 };
 
 function normalizer(itemName) {
+  if (itemName.length < 2) {
+    return itemName;
+  }
   const searchArray = itemName
     .replace(/[^\w\s]|_/g, '')
     .replace(/\s+/g, ' ')

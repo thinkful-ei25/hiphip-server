@@ -10,6 +10,10 @@ function getCategory(name) {
 }
 
 function findAndUpdateAisleLocation(storeId, categoryId, aisleNo = null) {
+  //if no store just create aislelocation, no store
+  if (!storeId) {
+    return AisleLocation.create({ category: categoryId, aisleNo });
+  }
   return AisleLocation.findOne({ category: categoryId, store: storeId }).then(
     aisleLocation => {
       if (!aisleLocation) {

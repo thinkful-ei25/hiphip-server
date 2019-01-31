@@ -25,8 +25,13 @@ router.route('/coords').get((req, res, next) => {
     }
   )
     .then(res => res.json())
-    .then(businesses => {
-      res.json(businesses);
+    .then(arr => {
+      let answer = arr.businesses;
+      answer = answer.slice(0, 7);
+      answer.sort(function(a, b) {
+        return a.distance - b.distance;
+      });
+      res.json({ businesses: answer });
     })
     .catch(next);
 });
@@ -48,8 +53,13 @@ router.route('/location').get((req, res, next) => {
     }
   )
     .then(res => res.json())
-    .then(businesses => {
-      res.json(businesses);
+    .then(arr => {
+      let answer = arr.businesses;
+      answer = answer.slice(0, 7);
+      answer.sort(function(a, b) {
+        return a.distance - b.distance;
+      });
+      res.json({ businesses: answer });
     })
     .catch(next);
 });
