@@ -31,7 +31,7 @@ router
     const { listId } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(listId)) {
-      throw new HttpError(422, `${listId} is not a valid ObjectId`);
+      throw new HttpError(404, `${listId} is not a valid ObjectId`);
     }
     ShoppingList.findOne({ user, listId })
       .populate('items.aisleLocation', 'aisleNo')
