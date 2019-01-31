@@ -9,9 +9,9 @@ const { ValidationError } = require('../errors');
 const router = express.Router();
 
 router.route('/coords').get((req, res, next) => {
-  const { term, category, latitude, longitude } = req.query;
+  const { term, category, latitude, longitude } = req.body;
   const requiredFields = ['term', 'category', 'latitude', 'longitude'];
-  const missingField = requiredFields.find(field => req.query[field] === '');
+  const missingField = requiredFields.find(field => req.body[field] === '');
   if (missingField) {
     throw new ValidationError(missingField, 'Missing field', 422);
   }
@@ -37,9 +37,9 @@ router.route('/coords').get((req, res, next) => {
 });
 
 router.route('/location').get((req, res, next) => {
-  const { term, category, location } = req.query;
+  const { term, category, location } = req.body;
   const requiredFields = ['term', 'category', 'location'];
-  const missingField = requiredFields.find(field => req.query[field] === '');
+  const missingField = requiredFields.find(field => req.body[field] === '');
   if (missingField) {
     throw new ValidationError(missingField, 'Missing field', 422);
   }
