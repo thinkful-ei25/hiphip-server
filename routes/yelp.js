@@ -7,8 +7,9 @@ const { YELP_AUTH_TOKEN } = require('../config');
 const { ValidationError } = require('../errors');
 
 const router = express.Router();
+router.use(express.json());
 
-router.route('/coords').get((req, res, next) => {
+router.route('/coords').post((req, res, next) => {
   const { term, category, latitude, longitude } = req.body;
   const requiredFields = ['term', 'category', 'latitude', 'longitude'];
   const missingField = requiredFields.find(field => req.body[field] === '');
@@ -36,7 +37,7 @@ router.route('/coords').get((req, res, next) => {
     .catch(next);
 });
 
-router.route('/location').get((req, res, next) => {
+router.route('/location').post((req, res, next) => {
   const { term, category, location } = req.body;
   const requiredFields = ['term', 'category', 'location'];
   const missingField = requiredFields.find(field => req.body[field] === '');
