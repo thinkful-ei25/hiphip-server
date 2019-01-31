@@ -162,7 +162,7 @@ router
             findAndUpdateAisleLocation(
               list.store && list.store._id,
               category._id,
-              aisleLocation
+              aisleLocation.aisleNo
             )
           )
         );
