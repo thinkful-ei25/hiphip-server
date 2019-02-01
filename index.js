@@ -12,7 +12,6 @@ const usersRouter = require('./routes/users');
 const authRouter = require('./routes/auth');
 const storeRouter = require('./routes/store');
 const listRouter = require('./routes/lists');
-const itemRouter = require('./routes/items');
 const yelpRouter = require('./routes/yelp');
 const errorHandler = require('./middleware/errorHandler');
 

@@ -24,7 +24,7 @@ router
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new HttpError(422, `${id} is not a valid ObjectId`);
+      throw new HttpError(404, `${id} is not a valid ObjectId`);
     }
 
     ShoppingList.findOne({ _id: id, user })

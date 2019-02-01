@@ -1,17 +1,17 @@
 'use strict';
 const express = require('express');
-const bodyParser = require('body-parser');
 const fetch = require('node-fetch');
 
 const { YELP_AUTH_TOKEN } = require('../config');
 const { ValidationError } = require('../errors');
 
 const router = express.Router();
+router.use(express.json());
 
-router.route('/coords').get((req, res, next) => {
-  const { term, category, latitude, longitude } = req.query;
+router.route('/coords').post((req, res, next) => {
+  const { term, category, latitude, longitude } = req.body;
   const requiredFields = ['term', 'category', 'latitude', 'longitude'];
-  const missingField = requiredFields.find(field => req.query[field] === '');
+  const missingField = requiredFields.find(field => req.body[field] === '');
   if (missingField) {
     throw new ValidationError(missingField, 'Missing field', 422);
   }
@@ -27,7 +27,7 @@ router.route('/coords').get((req, res, next) => {
     .then(res => res.json())
     .then(arr => {
       let answer = arr.businesses;
-      answer = answer.slice(0, 7);
+      answer = answer.slice(0, 15);
       answer.sort(function(a, b) {
         return a.distance - b.distance;
       });
@@ -36,10 +36,10 @@ router.route('/coords').get((req, res, next) => {
     .catch(next);
 });
 
-router.route('/location').get((req, res, next) => {
-  const { term, category, location } = req.query;
+router.route('/location').post((req, res, next) => {
+  const { term, category, location } = req.body;
   const requiredFields = ['term', 'category', 'location'];
-  const missingField = requiredFields.find(field => req.query[field] === '');
+  const missingField = requiredFields.find(field => req.body[field] === '');
   if (missingField) {
     throw new ValidationError(missingField, 'Missing field', 422);
   }
@@ -55,7 +55,7 @@ router.route('/location').get((req, res, next) => {
     .then(res => res.json())
     .then(arr => {
       let answer = arr.businesses;
-      answer = answer.slice(0, 7);
+      answer = answer.slice(0, 15);
       answer.sort(function(a, b) {
         return a.distance - b.distance;
       });

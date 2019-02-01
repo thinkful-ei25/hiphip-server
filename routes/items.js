@@ -5,7 +5,6 @@ const mongoose = require('mongoose');
 
 const { HttpError, NotFoundError, ValidationError } = require('../errors');
 
-const User = require('../models/User');
 const ShoppingList = require('../models/ShoppingList');
 const {
   getCategory,
@@ -31,7 +30,7 @@ router
     const { listId } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(listId)) {
-      throw new HttpError(422, `${listId} is not a valid ObjectId`);
+      throw new HttpError(404, `${listId} is not a valid ObjectId`);
     }
     ShoppingList.findOne({ user, listId })
       .populate('items.aisleLocation', 'aisleNo')
@@ -162,7 +161,7 @@ router
             findAndUpdateAisleLocation(
               list.store && list.store._id,
               category._id,
-              aisleLocation
+              aisleLocation.aisleNo
             )
           )
         );
