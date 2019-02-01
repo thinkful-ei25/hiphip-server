@@ -1,6 +1,5 @@
 'use strict';
 const express = require('express');
-const bodyParser = require('body-parser');
 const fetch = require('node-fetch');
 
 const { YELP_AUTH_TOKEN } = require('../config');

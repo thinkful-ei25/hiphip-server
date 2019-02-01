@@ -5,7 +5,6 @@ const mongoose = require('mongoose');
 
 const { HttpError, NotFoundError, ValidationError } = require('../errors');
 
-const User = require('../models/User');
 const ShoppingList = require('../models/ShoppingList');
 const {
   getCategory,
