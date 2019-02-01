@@ -28,7 +28,7 @@ router.route('/coords').post((req, res, next) => {
     .then(res => res.json())
     .then(arr => {
       let answer = arr.businesses;
-      answer = answer.slice(0, 7);
+      answer = answer.slice(0, 15);
       answer.sort(function(a, b) {
         return a.distance - b.distance;
       });
@@ -56,7 +56,7 @@ router.route('/location').post((req, res, next) => {
     .then(res => res.json())
     .then(arr => {
       let answer = arr.businesses;
-      answer = answer.slice(0, 7);
+      answer = answer.slice(0, 15);
       answer.sort(function(a, b) {
         return a.distance - b.distance;
       });
