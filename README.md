@@ -17,7 +17,7 @@ To read additional details, our Github repo for our client can be found [here](h
 
 ## Database Structure (Mongoose)
 
-![Our dabase structure](/pictures/database-structure)
+![Our dabase structure](./pictures/database-structure.png)
 
 ## Installation
 
