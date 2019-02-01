@@ -32,7 +32,7 @@ In case you want to run a local version of GoCery, below you may find installati
 $ npm install
 ```
 
-2. Update `config.js` with the URL for your MongoDB instance, and your JWT secret.
+2. Update `config.js` with the URL for your MongoDB instance, your own Yelp API key, and your JWT secret.
 
 3. Launch the Server
 
