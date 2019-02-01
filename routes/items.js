@@ -151,7 +151,7 @@ router
           item.name = name;
         }
 
-        if (isChecked !== item.isChecked) {
+        if (isChecked !== undefined && isChecked !== item.isChecked) {
           item.isChecked = isChecked;
         }
 
