@@ -15,6 +15,10 @@ Our live client application is hosted [here](https://gocery-app.netlify.com).
 
 To read additional details, our Github repo for our client can be found [here](https://github.com/thinkful-ei25/hiphip).
 
+## Database Structure (Mongoose)
+
+![Our dabase structure](/pictures/database-structure)
+
 ## Installation
 
 In case you want to run a local version of GoCery, below you may find installation instructions.
