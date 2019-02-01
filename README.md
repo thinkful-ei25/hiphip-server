@@ -1,45 +1,45 @@
-# Thinkful Backend Template
+# GoCery (server)
 
-A template for developing and deploying Node.js apps.
+GoCery helps shoppers spend less time in supermarkets by sorting shoppings lists based on crowd-sourced aisle information.
 
-## Getting started
+## Tech Stack
 
-### Setting up a project
+- Node
+- Express
+- MongoDB/Mongoose
+- Node-Fetch
 
-* Move into your projects directory: `cd ~/YOUR_PROJECTS_DIRECTORY`
-* Clone this repository: `git clone https://github.com/Thinkful-Ed/backend-template YOUR_PROJECT_NAME`
-* Move into the project directory: `cd YOUR_PROJECT_NAME`
-* Install the dependencies: `npm install`
-* Create a new repo on GitHub: https://github.com/new
-    * Make sure the "Initialize this repository with a README" option is left unchecked
-* Update the remote to point to your GitHub repository: `git remote set-url origin https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME`
+## Front End
 
-### Working on the project
+Our live client application is hosted [here](https://gocery-app.netlify.com).
 
-* Move into the project directory: `cd ~/YOUR_PROJECTS_DIRECTORY/YOUR_PROJECT_NAME`
-* Run the development task: `npm start`
-    * Starts a server running at http://localhost:8080
-    * Automatically restarts when any of your files change
+To read additional details, our Github repo for our client can be found [here](https://github.com/thinkful-ei25/hiphip).
 
-## Databases
+## Database Structure (Mongoose)
 
-By default, the template is configured to connect to a MongoDB database using Mongoose.  It can be changed to connect to a PostgreSQL database using Knex by replacing any imports of `db-mongoose.js` with imports of `db-knex.js`, and uncommenting the Postgres `DATABASE_URL` lines in `config.js`.
+![Our dabase structure](./pictures/database-structure.png)
 
-## Deployment
+## Installation
 
-Requires the [Heroku CLI client](https://devcenter.heroku.com/articles/heroku-command-line).
+In case you want to run a local version of GoCery, below you may find installation instructions.
 
-### Setting up the project on Heroku
+### Requirements
 
-* Move into the project directory: `cd ~/YOUR_PROJECTS_DIRECTORY/YOUR_PROJECT_NAME`
-* Create the Heroku app: `heroku create PROJECT_NAME`
+- MongoDB
+- Node.js
 
-* If your backend connects to a database, you need to configure the database URL:
-    * For a MongoDB database: `heroku config:set DATABASE_URL=mongodb://USERNAME:PASSWORD@HOST:PORT/DATABASE_NAME`
-    * For a PostgreSQL database: `heroku config:set DATABASE_URL=postgresql://USERNAME:PASSWORD@HOST:PORT/DATABASE_NAME`
+### Instructions
 
-* If you are creating a full-stack app, you need to configure the client origin: `heroku config:set CLIENT_ORIGIN=https://www.YOUR_DEPLOYED_CLIENT.com`
+1. Clone the repository and run
 
-### Deploying to Heroku
+```bash
+$ npm install
+```
 
-* Push your code to Heroku: `git push heroku master`
+2. Update `config.js` with the URL for your MongoDB instance, your own Yelp API key, and your JWT secret.
+
+3. Launch the Server
+
+```bash
+npm start
+```
