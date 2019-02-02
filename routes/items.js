@@ -71,7 +71,7 @@ router
         return findAndUpdateAisleLocation(
           list.store,
           category._id,
-          aisleLocation
+          aisleLocation.aisleNo
         );
       })
       .then(aisleLocation => {
